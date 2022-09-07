@@ -7,8 +7,6 @@ from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
 from pybricks.media.ev3dev import SoundFile, ImageFile
 
-from random import choice
-
 
 # This program requires LEGO EV3 MicroPython v2.0 or higher.
 # Click "Open user guide" on the EV3 extension tab for more information.
@@ -26,7 +24,6 @@ motorL = Motor(Port.C)
 motorR = Motor(Port.B)
 robot = DriveBase(motorL, motorR, wheel_diameter=55.5, axle_track=104)
 
-
 # Write your program here.
 while True:
     detectedL = colL.reflection() >= sensor_threshold
@@ -36,7 +33,6 @@ while True:
     if new_state != sensor_state:
         sensor_state = new_state
         robot.stop()
-        robot.drive(max((detectedL and detectedR) * robot_speed, robot_speed/2), (detectedL-detectedR) * turn_speed)
-    elif not (detectedL or detectedR):
-        robot.drive(robot_speed/3, turn_speed)
-        wait(1000)
+        robot.drive((detectedL and detectedR) * robot_speed, (detectedR-detectedL) * turn_speed)
+    elif robot.state()[1] == 0 and robot.state()[3] == 0:
+        robot.drive(0, -turn_speed)
