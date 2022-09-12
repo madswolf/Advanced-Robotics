@@ -7,6 +7,8 @@ from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
 from pybricks.media.ev3dev import SoundFile, ImageFile
 
+import sys
+
 from random import choice
 
 
@@ -28,7 +30,7 @@ motorR = Motor(Port.B)
 robot = DriveBase(motorL, motorR, wheel_diameter=56, axle_track=130)
 angle = robot.state()[2]
 
-ev3.speaker.set_volume(33)
+ev3.speaker.set_volume(20)
 
 def intersection_move(direction):
     if direction == "straight":
@@ -53,12 +55,20 @@ def intersection_move(direction):
     elif direction == "180":
         robot.stop()
         ev3.speaker.beep(4000)
-        robot.drive(0, 180)
+        robot.drive(70, 180)
         wait(1000)
         robot.drive(robot_speed, 0)
         wait(1000)
+    elif direction == "backwards":
+        robot.stop()
+        robot.drive(-robot_speed, 0)
+        wait(2000)
+        robot.drive(70, 180)
+        wait(1000)
+    elif direction == "stop":
+        sys.exit(0)
 
-move_sequence = ["right", "left", "straight", "180", "straight", "right", "left", "180"]
+move_sequence = ["right", "left", "straight", "backwards", "stop"]
 move_pointer = 0
 
 # Write your program here.
