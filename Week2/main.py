@@ -34,28 +34,28 @@ def intersection_move(direction):
     if direction == "straight":
         robot.stop()
         ev3.speaker.beep(2000)
-        robot.drive(50, 0)
+        robot.drive(robot_speed, 0)
         wait(1500)
     elif direction == "right":
         robot.stop()
         ev3.speaker.beep(3000)
         robot.drive(90, 90)
         wait(1000)
-        robot.drive(robot_speed*2, 0)
+        robot.drive(robot_speed, 0)
         wait(1000)
     elif direction == "left":
         robot.stop()
         ev3.speaker.beep(1000)
         robot.drive(50, -90)
         wait(1000)
-        robot.drive(robot_speed*2, 0)
+        robot.drive(robot_speed, 0)
         wait(1000)
     elif direction == "180":
         robot.stop()
         ev3.speaker.beep(4000)
         robot.drive(0, 180)
         wait(1000)
-        robot.drive(robot_speed*2, 0)
+        robot.drive(robot_speed, 0)
         wait(1000)
 
 move_sequence = ["right", "left", "straight", "180", "straight", "right", "left", "180"]
