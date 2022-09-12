@@ -14,7 +14,7 @@ from random import choice
 # Click "Open user guide" on the EV3 extension tab for more information.
 
 sensor_threshold = 10
-robot_speed = 30 # mm/s
+robot_speed = 60 # mm/s
 turn_speed = 90 # deg/s
 sensor_state = [False, False]
 
@@ -25,7 +25,7 @@ colR = ColorSensor(Port.S2)
 colM = ColorSensor(Port.S4)
 motorL = Motor(Port.C)
 motorR = Motor(Port.B)
-robot = DriveBase(motorL, motorR, wheel_diameter=56, axle_track=140)
+robot = DriveBase(motorL, motorR, wheel_diameter=56, axle_track=130)
 angle = robot.state()[2]
 
 ev3.speaker.set_volume(33)
@@ -35,11 +35,11 @@ def intersection_move(direction):
         robot.stop()
         ev3.speaker.beep(2000)
         robot.drive(50, 0)
-        wait(1000)
+        wait(1500)
     elif direction == "right":
         robot.stop()
         ev3.speaker.beep(3000)
-        robot.drive(50, 90)
+        robot.drive(90, 90)
         wait(1000)
         robot.drive(robot_speed*2, 0)
         wait(1000)
@@ -56,9 +56,9 @@ def intersection_move(direction):
         robot.drive(0, 180)
         wait(1000)
         robot.drive(robot_speed*2, 0)
-        wait(2000)
+        wait(1000)
 
-move_sequence = ["right"]
+move_sequence = ["right", "left", "straight", "180", "straight", "right", "left", "180"]
 move_pointer = 0
 
 # Write your program here.
