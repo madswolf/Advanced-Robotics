@@ -81,88 +81,63 @@ def posToBoardState(pos):
     return board[pos[0]][pos[1]]
 
 def isCorner(pos):
-    up = posToBoardState(goInDirection(pos,north))
-    down = posToBoardState(goInDirection(pos,south))
-    left = posToBoardState(goInDirection(pos,east))
-    right = posToBoardState(goInDirection(pos,west))
+    up = posToBoardState(goInDirection(pos, north))
+    down = posToBoardState(goInDirection(pos, south))
+    left = posToBoardState(goInDirection(pos, east))
+    right = posToBoardState(goInDirection(pos, west))
 
     if(
-        up == wall and left == wall
-        or up == wall and right == wall
-        or down == wall and left == wall
-        or down == wall and right == wall
+        up != wall and down != wall
+        or right != wall and left != wall
         ):
-        return True
+        return False
     else:
-        return False
+        return True
 
-def canGoInDirection(robotPos, diamonds, direction):
-    newPos = goInDirection(robotPos, direction)
-    #print(newPos)
-    if(posToBoardState(newPos) == wall): #moves into wall
-        #print("moved into wall")
-        return False
-    
-    for diamondPos in diamonds:
-        if(newPos == diamondPos):
-            newDiamondPos = goInDirection(diamondPos, direction)
-            for diamondPos2 in diamonds:
-                if(newDiamondPos == diamondPos2):  #moves two diamonds
-                    #print("moves two diamonds")
-                    return False 
-            
-            if (posToBoardState(newDiamondPos) == wall): #diamond moves into wall
-                #print("moved diamond into wall")
-                return False
-            if(isCorner(newDiamondPos) and posToBoardState(newDiamondPos) != goal): #moves into corner
-                #print("moved into corner")
-                return False
-            
-    return True
+states = deque([[robotPos, diamondPositions, []]])
 
 def hasWon(state):
     currDiamondPos = state[1]
     #print(goalPosisitions, currDiamondPos)
     return sorted(goalPosisitions) == sorted(currDiamondPos)
 
-def updateDiamondPos(robotPos, currDiamondPos, direction):
-    newDiamondPos = []
-    for diamondPos in currDiamondPos:
-        if diamondPos == goInDirection(robotPos, direction):
-            diamondPos = goInDirection(diamondPos, direction)
-        newDiamondPos.append(diamondPos)
-    return newDiamondPos
+def exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, direction):
+    newPos = goInDirection(currRobotPos, direction)
+    #print(newPos)
+    if(posToBoardState(newPos) == wall): #moves into wall
+        #print("moved into wall")
+        return
+    
+    for i in range(len(currDiamondPos)):
+        diamondPos = currDiamondPos[i]
+        if(newPos == diamondPos):
+            newDiamondPos = goInDirection(diamondPos, direction)
+            for diamondPos2 in currDiamondPos:
+                if(newDiamondPos == diamondPos2):  #moves two diamonds
+                    #print("moves two diamonds")
+                    return
+            currDiamondPos[i] = newDiamondPos
+            
+            newDiamondPosBoardState = posToBoardState(newDiamondPos) 
 
-states = deque([[robotPos, diamondPositions, []]])
+            if (newDiamondPosBoardState == wall): #diamond moves into wall
+                #print("moved diamond into wall")
+                return
+            if(isCorner(newDiamondPos) and newDiamondPosBoardState != goal): #moves into corner
+                #print("moved into corner")
+                return
+    newMoves = [*moves, direction]
+    states.append([newPos, currDiamondPos, newMoves])
 
 def expandState(state):
     currRobotPos = state[0]
     currDiamondPos = state[1]
     moves = state[2]
 
-    if(canGoInDirection(currRobotPos, currDiamondPos, north)):
-        newDiamondPos = updateDiamondPos(currRobotPos, currDiamondPos, north)
-        newMoves = moves.copy()
-        newMoves.append(north)
-        states.append([goInDirection(currRobotPos, north), newDiamondPos, newMoves])
-
-    if(canGoInDirection(currRobotPos, currDiamondPos, south)):
-        newDiamondPos = updateDiamondPos(currRobotPos, currDiamondPos, south)
-        newMoves = moves.copy()
-        newMoves.append(south)
-        states.append([goInDirection(currRobotPos, south),newDiamondPos, newMoves])
-
-    if(canGoInDirection(currRobotPos, currDiamondPos, east)):
-        newDiamondPos = updateDiamondPos(currRobotPos, currDiamondPos, east)
-        newMoves = moves.copy()
-        newMoves.append(east)
-        states.append([goInDirection(currRobotPos, east),newDiamondPos, newMoves])
-    
-    if(canGoInDirection(currRobotPos, currDiamondPos, west)):
-        newDiamondPos = updateDiamondPos(currRobotPos, currDiamondPos, west)
-        newMoves = moves.copy()
-        newMoves.append(west)
-        states.append([goInDirection(currRobotPos, west),newDiamondPos, newMoves])
+    exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, north)
+    exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, south)
+    exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, east)
+    exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, west)
 
 print(diamondPositions, robotPos, goalPosisitions)
 
