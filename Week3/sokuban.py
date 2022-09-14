@@ -52,6 +52,7 @@ for i in range(len(lines)):
             print(4)
             board[i][j] = 2
             diamondPositions.append(position)
+            goalPosisitions.append(position)
         elif symbol is wall:
             print(5)
             board[i][j] = 1
@@ -97,9 +98,9 @@ def isCorner(pos):
 
 def canGoInDirection(robotPos, diamonds, direction):
     newPos = goInDirection(robotPos, direction)
-    print(newPos)
+    #print(newPos)
     if(posToBoardState(newPos) == wall): #moves into wall
-        print("moved into wall")
+        #print("moved into wall")
         return False
     
     for diamondPos in diamonds:
@@ -107,21 +108,21 @@ def canGoInDirection(robotPos, diamonds, direction):
             newDiamondPos = goInDirection(diamondPos, direction)
             for diamondPos2 in diamonds:
                 if(newDiamondPos == diamondPos2):  #moves two diamonds
-                    print("moves two diamonds")
+                    #print("moves two diamonds")
                     return False 
             
             if (posToBoardState(newDiamondPos) == wall): #diamond moves into wall
-                print("moved diamond into wall")
+                #print("moved diamond into wall")
                 return False
             if(isCorner(newDiamondPos) and posToBoardState(newDiamondPos) != goal): #moves into corner
-                print("moved into corner")
+                #print("moved into corner")
                 return False
             
     return True
 
 def hasWon(state):
     currDiamondPos = state[1]
-    print(goalPosisitions, currDiamondPos)
+    #print(goalPosisitions, currDiamondPos)
     return sorted(goalPosisitions) == sorted(currDiamondPos)
 
 def updateDiamondPos(robotPos, currDiamondPos, direction):
@@ -165,8 +166,13 @@ def expandState(state):
 
 print(diamondPositions, robotPos, goalPosisitions)
 
+currDepth = 0
+
 while len(states) != 0:
     state = states.popleft()
+    if(currDepth < len(state[2])):
+        currDepth = len(state[2])
+        print(currDepth)
     if(hasWon(state)):
         print("has won")
         print(state[2]) 
