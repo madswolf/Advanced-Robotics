@@ -18,10 +18,10 @@ board = [[0 for _ in range(width)] for _ in range(height)]
 
 robotPos = (0,0)
 robotDirection = 0
-north = 0
-south = 1
-east = 2
-west = 3
+north = 'u'
+south = 'd'
+east = 'r'
+west = 'l'
 # 0 = north
 # 1 = south
 # 2 = east 
@@ -190,6 +190,6 @@ path = ""
 while(currNode.parentNode != None):
     path += str(currNode.moveDirection)
     currNode = currNode.parentNode
-print(path)
+print(path[::-1])
 #for state in exploredStates:
 #    print(state)
