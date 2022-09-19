@@ -1,5 +1,6 @@
 import sys
 from collections import deque
+import time
 lines = sys.stdin.readlines()
 
 diamond = '$'
@@ -18,10 +19,10 @@ board = [[0 for _ in range(width)] for _ in range(height)]
 
 robotPos = (0,0)
 robotDirection = 0
-north = 'u'
-south = 'd'
-east = 'r'
-west = 'l'
+north = 'up'
+south = 'down'
+east = 'right'
+west = 'left'
 # 0 = north
 # 1 = south
 # 2 = east 
@@ -31,37 +32,37 @@ goalPosisitions = []
 diamondPositions = []
 for i in range(len(lines)):
     line = lines[i].strip()
-    print("line equals", line)
+    #print("line equals", line)
     for j in range(len(line)):
         position = (i,j)
         symbol = line[j]
-        print("symbol equals", symbol)
+    #    print("symbol equals", symbol)
         if symbol is robot:
-            print(1)
+    #        print(1)
             robotPos = position
             board[i][j] = 0
         elif symbol is goal:
-            print(2)
+    #        print(2)
             goalPosisitions.append(position)
             board[i][j] = 2
         elif symbol is diamond:
-            print(3)
+    #        print(3)
             diamondPositions.append(position)
             board[i][j] = 0
         elif symbol is diamondOnGoal:
-            print(4)
+    #        print(4)
             board[i][j] = 2
             diamondPositions.append(position)
             goalPosisitions.append(position)
         elif symbol is wall:
-            print(5)
+    #        print(5)
             board[i][j] = 1
         else:
-            print(6)
+    #        print(6)
             board[i][j] = 0
 
-for line in board:
-    print(line)
+#for line in board:
+#    print(line)
 
 air = 0
 wall = 1
@@ -100,15 +101,16 @@ class State:
         self.diamondPos = diamondPos
 
 class Node:
-    def __init__(self, state:State, parentNode, moveDirection):
+    def __init__(self, state:State, parentNode, moveDirection, hasMovedBox):
         self.state = state
         self.parentNode = parentNode
         self.moveDirection = moveDirection
+        self.hasMovedBox = hasMovedBox
 
 # state is (robot pos, diamondPositions, parentStateIndex, moveDirection) 
 nodes = deque()
 goalPosisitions = goalPosisitions
-startNode = Node(State(robotPos, diamondPositions), None, None)
+startNode = Node(State(robotPos, diamondPositions), None, None, False)
 nodes.append(startNode)
 exploredStates = set()
 
@@ -125,10 +127,12 @@ def exPandDirectionIfPossible(state:State, parentNode:Node, direction):
     if(posToBoardState(newPos) == wall): #moves into wall
         #print("moved into wall")
         return
+    hasMovedBox = False
     for i in range(len(currDiamondPos)):
         diamondPos = currDiamondPos[i]
         if(newPos == diamondPos):
             #print("moved diamond")
+            hasMovedBox = True
             newDiamondPos = goInDirection(diamondPos, direction)
             #print(newDiamondPos)
             for diamondPos2 in currDiamondPos:
@@ -145,7 +149,7 @@ def exPandDirectionIfPossible(state:State, parentNode:Node, direction):
                 #print("moved into corner")
                 return
     #print("adding node:", newPos, currDiamondPos)
-    nodes.append(Node(State(newPos, currDiamondPos), parentNode, direction))
+    nodes.append(Node(State(newPos, currDiamondPos), parentNode, direction, hasMovedBox))
     #print("end expansion")
 
 def expandState(node:Node):
@@ -164,12 +168,13 @@ def expandState(node:Node):
     #else:
     #    print(node, "was explored")
 
-print(diamondPositions, robotPos, goalPosisitions)
+#print(diamondPositions, robotPos, goalPosisitions)
 
 currDepth = 0
-print(nodes)
+#print(nodes)
 iterations = 0
 finishnode = startNode
+start = time.time()
 while len(nodes) != 0:
     iterations += 1
     node = nodes.popleft()
@@ -178,18 +183,21 @@ while len(nodes) != 0:
     #if(iterations % 1000 == 0):
     #    print(iterations)
     if(hasWon(node)):
-        print("has won")
+        #print("has won")
         finishnode = node
-        print(iterations)
+        #print(iterations)
         break
     expandState(node)
-print("finished")
+#print("runtime: %s" % (time.time()-start))
+#print("finished")
 
 currNode = finishnode
-path = ""
+path = []
 while(currNode.parentNode != None):
-    path += str(currNode.moveDirection)
+    if(currNode.hasMovedBox):
+        path.append("moved box")
+    path.append(currNode.moveDirection) 
     currNode = currNode.parentNode
-print(path[::-1])
+print(" ".join(path[::-1]))
 #for state in exploredStates:
 #    print(state)
