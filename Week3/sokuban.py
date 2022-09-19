@@ -195,7 +195,7 @@ currNode = finishnode
 path = []
 while(currNode.parentNode != None):
     if(currNode.hasMovedBox):
-        path.append("moved box")
+        path.append("moved_box")
     path.append(currNode.moveDirection) 
     currNode = currNode.parentNode
 print(" ".join(path[::-1]))

@@ -6,11 +6,12 @@ def parse_moved_box(moves):
     i = 0
     while i < len(moves):
         if moves[i] == "moved_box":
-            if moves[i-1] != moves[i+1]:
+            if moves[i-1] != moves[i+1] and moves[i+1] != "stop":
                 output.append("backwards")
         else:
             output.append(moves[i])
         i += 1
+    return output
 
 def rotate_move(move): # returns instruction according to current robot orientation, and sets new orientation
     global robot_direction
@@ -36,9 +37,13 @@ def direction_to_index(direction):
         
 moves = input().split()
 moves.append("stop")
+moves = parse_moved_box(moves)
 
+human_instruction = moves[0]
 robot_direction = int(direction_to_index(moves.pop(0)))
 for m in moves:
     step_move(m)
 
+instruction_output = instruction_output[:-1] + ["up", "stop"] # push one further at the end
+print("Human! Face me " + human_instruction)
 print(" ".join(instruction_output))

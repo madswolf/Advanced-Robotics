@@ -17,7 +17,7 @@ from random import choice
 
 sensor_threshold = 10
 robot_speed = 80 # mm/s
-straight_speed = 150
+straight_speed = 120
 time_factor = 60 / robot_speed # 60 = magic number that everything is calibrated with
 turn_speed = 90 # deg/s
 sensor_state = [False, False]
@@ -60,14 +60,14 @@ def intersection_move(direction):
     elif direction == "backwards":
         robot.drive(-robot_speed, 0)
         wait(2000 * time_factor)
-        robot.drive(35, 120) # usually (70,180), but changed due to batteries being weak
-        wait(1000)
-        while not middle_detect_black():
-            wait(50)
+        robot.drive(35, 90) # usually (70,180), but changed due to batteries being weak
+        wait(2000)
     elif direction == "stop":
         sys.exit(0)
 
-move_sequence = open("instructions", "r").readline().split()
+instruction_file = open("instructions", "r")
+instruction_file.readline()
+move_sequence = instruction_file.readline().split()
 move_pointer = 0
 
 # Write your program here.
@@ -79,7 +79,7 @@ while True:
 
     if new_state != sensor_state:
         sensor_state = new_state
-        robot.drive(straight_speed, (detectedM*2-1) * turn_speed*0.15 / time_factor)
+        robot.drive(straight_speed, (detectedM*2-1) * turn_speed*0.2 / time_factor)
     elif not (detectedL and detectedR):
         intersection_move(move_sequence[move_pointer])
         angle = robot.state()[2]
