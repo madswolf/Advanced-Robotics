@@ -94,24 +94,43 @@ def isCorner(pos):
     else:
         return True
 
-states = deque([[robotPos, diamondPositions, []]])
+class State:
+    def __init__(self, robotPos, diamondPos):
+        self.robotPos = robotPos
+        self.diamondPos = diamondPos
 
-def hasWon(state):
-    currDiamondPos = state[1]
+class Node:
+    def __init__(self, state:State, parentNode, moveDirection):
+        self.state = state
+        self.parentNode = parentNode
+        self.moveDirection = moveDirection
+
+# state is (robot pos, diamondPositions, parentStateIndex, moveDirection) 
+nodes = deque()
+goalPosisitions = goalPosisitions
+startNode = Node(State(robotPos, diamondPositions), None, None)
+nodes.append(startNode)
+exploredStates = set()
+
+def hasWon(node:Node):
+    currDiamondPos = node.state.diamondPos
     #print(goalPosisitions, currDiamondPos)
     return sorted(goalPosisitions) == sorted(currDiamondPos)
 
-def exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, direction):
-    newPos = goInDirection(currRobotPos, direction)
-    #print(newPos)
+def exPandDirectionIfPossible(state:State, parentNode:Node, direction):
+    #print("start expansion")
+    newPos = goInDirection(state.robotPos, direction)
+    #print("oldpos ", state.robotPos, " -> new pos ", newPos)
+    currDiamondPos = state.diamondPos
     if(posToBoardState(newPos) == wall): #moves into wall
         #print("moved into wall")
         return
-    
     for i in range(len(currDiamondPos)):
         diamondPos = currDiamondPos[i]
         if(newPos == diamondPos):
+            #print("moved diamond")
             newDiamondPos = goInDirection(diamondPos, direction)
+            #print(newDiamondPos)
             for diamondPos2 in currDiamondPos:
                 if(newDiamondPos == diamondPos2):  #moves two diamonds
                     #print("moves two diamonds")
@@ -119,37 +138,58 @@ def exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, direction):
             currDiamondPos[i] = newDiamondPos
             
             newDiamondPosBoardState = posToBoardState(newDiamondPos) 
-
             if (newDiamondPosBoardState == wall): #diamond moves into wall
                 #print("moved diamond into wall")
                 return
             if(isCorner(newDiamondPos) and newDiamondPosBoardState != goal): #moves into corner
                 #print("moved into corner")
                 return
-    newMoves = [*moves, direction]
-    states.append([newPos, currDiamondPos, newMoves])
+    #print("adding node:", newPos, currDiamondPos)
+    nodes.append(Node(State(newPos, currDiamondPos), parentNode, direction))
+    #print("end expansion")
 
-def expandState(state):
-    currRobotPos = state[0]
-    currDiamondPos = state[1]
-    moves = state[2]
+def expandState(node:Node):
+    global exploredStates
+    #print(exploredStates)
+    currDiamondPos = frozenset(node.state.diamondPos)
+    testState  = (node.state.robotPos, currDiamondPos)
+    #print(testState)
+    if(testState not in exploredStates): 
+        exploredStates.add((node.state.robotPos, currDiamondPos))
 
-    exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, north)
-    exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, south)
-    exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, east)
-    exPandDirectionIfPossible(currRobotPos, currDiamondPos, moves, west)
+        exPandDirectionIfPossible(State(node.state.robotPos, node.state.diamondPos.copy()), node, north)
+        exPandDirectionIfPossible(State(node.state.robotPos, node.state.diamondPos.copy()), node, south)
+        exPandDirectionIfPossible(State(node.state.robotPos, node.state.diamondPos.copy()), node, east)
+        exPandDirectionIfPossible(State(node.state.robotPos, node.state.diamondPos.copy()), node, west)
+    #else:
+    #    print(node, "was explored")
 
 print(diamondPositions, robotPos, goalPosisitions)
 
 currDepth = 0
-
-while len(states) != 0:
-    state = states.popleft()
-    if(currDepth < len(state[2])):
-        currDepth = len(state[2])
-        print(currDepth)
-    if(hasWon(state)):
+print(nodes)
+iterations = 0
+finishnode = startNode
+while len(nodes) != 0:
+    iterations += 1
+    node = nodes.popleft()
+    #print(node, exploredStates)
+    #print(state)
+    #if(iterations % 1000 == 0):
+    #    print(iterations)
+    if(hasWon(node)):
         print("has won")
-        print(state[2]) 
+        finishnode = node
+        print(iterations)
         break
-    expandState(state)
+    expandState(node)
+print("finished")
+
+currNode = finishnode
+path = ""
+while(currNode.parentNode != None):
+    path += str(currNode.moveDirection)
+    currNode = currNode.parentNode
+print(path)
+#for state in exploredStates:
+#    print(state)
