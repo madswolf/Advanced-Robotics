@@ -17,9 +17,11 @@ from random import choice
 
 sensor_threshold = 10
 robot_speed = 80 # mm/s
-straight_speed = 120
+straight_speed = 150
 time_factor = 60 / robot_speed # 60 = magic number that everything is calibrated with
+straight_time_factor = 60 / straight_speed
 turn_speed = 90 # deg/s
+turn_procedure_speed_factor = 1.75
 sensor_state = [False, False]
 
 # Create your objects here.
@@ -40,16 +42,16 @@ def middle_detect_black():
 def intersection_move(direction):
     clamped_time_factor = max(time_factor, 0.6)
     if direction == "up":
-        robot.drive(robot_speed, 0)
-        wait(1500 * time_factor)
+        robot.drive(straight_speed, 0)
+        wait(1500 * straight_time_factor)
     elif direction == "right":
-        robot.drive(110, 93) # usually (90,90), but changed due to batteries being weak
-        wait(1000)
+        robot.drive(110 * turn_procedure_speed_factor, 93 * turn_procedure_speed_factor) # usually (90,90), but changed due to batteries being weak
+        wait(1000 / turn_procedure_speed_factor)
         robot.drive(robot_speed, 0)
         wait(333 * clamped_time_factor)
     elif direction == "left":
-        robot.drive(45, -93) # usually (50,-90), but changed due to batteries being weak
-        wait(1000)
+        robot.drive(45 * turn_procedure_speed_factor, -93 * turn_procedure_speed_factor) # usually (50,-90), but changed due to batteries being weak
+        wait(1000 / turn_procedure_speed_factor)
         robot.drive(robot_speed, 0)
         wait(333 * clamped_time_factor)
     elif direction == "down":
@@ -58,10 +60,10 @@ def intersection_move(direction):
         robot.drive(robot_speed, 0)
         wait(1000 * time_factor)
     elif direction == "backwards":
-        robot.drive(-robot_speed, 0)
-        wait(2000 * time_factor)
-        robot.drive(35, 90) # usually (70,180), but changed due to batteries being weak
-        wait(2000)
+        robot.drive(-straight_speed, 0)
+        wait(2000 * (60/straight_speed))
+        robot.drive(52.5, 135) # usually (70,180), but changed due to batteries being weak
+        wait(1500)
     elif direction == "stop":
         sys.exit(0)
 
@@ -79,7 +81,7 @@ while True:
 
     if new_state != sensor_state:
         sensor_state = new_state
-        robot.drive(straight_speed, (detectedM*2-1) * turn_speed*0.2 / time_factor)
+        robot.drive(straight_speed, (detectedM*2-1) * turn_speed*0.20 / time_factor)
     elif not (detectedL and detectedR):
         intersection_move(move_sequence[move_pointer])
         angle = robot.state()[2]

@@ -13,6 +13,16 @@ def parse_moved_box(moves):
         i += 1
     return output
 
+def insert_straights(moves):
+    i = 0
+    output = []
+    while i < len(moves):
+        if moves[i] == "backwards" and moves[i-1] != "up":
+            output.append("up")
+        output.append(moves[i])
+        i += 1
+    return output
+
 def rotate_move(move): # returns instruction according to current robot orientation, and sets new orientation
     global robot_direction
     move_order = ["up", "right", "down", "left"]
@@ -24,7 +34,7 @@ def rotate_move(move): # returns instruction according to current robot orientat
 def step_move(move):
     global robot_direction
     if move == "backwards":
-        instruction_output.append(instruction_output[-1]) # append extra instruction for pushing into the right square
+        instruction_output.append("up") # append extra instruction for pushing into the right square
         instruction_output.append("backwards")
         robot_direction = (robot_direction + 2) % 4
     elif move == "stop": instruction_output.append("stop")
@@ -43,6 +53,8 @@ human_instruction = moves[0]
 robot_direction = int(direction_to_index(moves.pop(0)))
 for m in moves:
     step_move(m)
+
+# instruction_output = insert_straights(instruction_output)
 
 instruction_output = instruction_output[:-1] + ["up", "stop"] # push one further at the end
 print("Human! Face me " + human_instruction)
