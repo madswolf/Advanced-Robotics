@@ -1,0 +1,1 @@
+down down down right moved_box right moved_box up left moved_box up moved_box left up right moved_box right moved_box

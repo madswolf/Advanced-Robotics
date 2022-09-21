@@ -7,7 +7,7 @@ diamond = '$'
 goal = '.'
 diamondOnGoal = '*'
 robot = '@'
-wall = '#'
+wall = 'X'
 
 width = len(lines[0].strip())
 height = len(lines)
