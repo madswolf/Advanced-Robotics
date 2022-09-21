@@ -21,7 +21,7 @@ straight_speed = 150
 time_factor = 60 / robot_speed # 60 = magic number that everything is calibrated with
 straight_time_factor = 60 / straight_speed
 turn_speed = 90 # deg/s
-turn_procedure_speed_factor = 1.75
+turn_procedure_speed_factor = 1.5
 sensor_state = [False, False]
 
 # Create your objects here.
@@ -45,7 +45,7 @@ def intersection_move(direction):
         robot.drive(straight_speed, 0)
         wait(1500 * straight_time_factor)
     elif direction == "right":
-        robot.drive(110 * turn_procedure_speed_factor, 93 * turn_procedure_speed_factor) # usually (90,90), but changed due to batteries being weak
+        robot.drive(110 * turn_procedure_speed_factor, 96 * turn_procedure_speed_factor) # usually (90,90), but changed due to batteries being weak
         wait(1000 / turn_procedure_speed_factor)
         robot.drive(robot_speed, 0)
         wait(333 * clamped_time_factor)
