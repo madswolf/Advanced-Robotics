@@ -1,4 +1,4 @@
-import shapely
+from shapely import affinity
 from shapely.geometry import LinearRing, LineString, Point
 from numpy import sin, cos, pi, sqrt
 from random import random
@@ -7,8 +7,8 @@ from random import random
 
 # Constants
 ###########
-R = 0.02  # radius of wheels in meters
-L = 0.10  # distance between wheels in meters
+R = 0.0225  # radius of wheels in meters
+L = 0.095  # distance between wheels in meters
 
 W = 2.0  # width of arena
 H = 2.0  # height of arena
@@ -49,16 +49,31 @@ def simulationstep():
 #################
 file = open("trajectory.dat", "w")
 
-for cnt in range(5000):
-    #simple single-ray sensor
-    ray = LineString([(x, y), (x+cos(q)*2*W,-(y+sin(q)*2*H)) ])  # a line from robot to a point outside arena in direction of q
+def line_distance(rotation = 0):
+    global x, y, q
+    projection = LineString([(x, y), (x+cos(q)*2*W,-(y+sin(q)*2*H)) ])  # a line from robot to a point outside arena in direction of q
+    ray = affinity.rotate(projection, rotation, (x,y))
     s = world.intersection(ray)
-    distance = sqrt((s.x-x)**2+(s.y-y)**2)                    # distance to wall
+    return sqrt((s.x-x)**2+(s.y-y)**2) 
+
+
+def robot_distance_to_wall():
+    angles = [-40, -20, 0, 20, 40]
+    distances = map(line_distance, angles)
+    return min(distances)
+
+
+for cnt in range(10000):
+    #simple single-ray sensor
+    distance = robot_distance_to_wall()
+    #front_ray = LineString([(x, y), (x+cos(q)*2*W,-(y+sin(q)*2*H)) ])  # a line from robot to a point outside arena in direction of q
+    #s = world.intersection(front_ray)
+    #distance = sqrt((s.x-x)**2+(s.y-y)**2)                    # distance to wall
     
     #simple controller - change direction of wheels every 10 seconds (100*robot_timestep) unless close to wall then turn on spot
-    if (distance < 0.5):
-        left_wheel_velocity = -0.4
-        right_wheel_velocity = 0.4
+    if (distance < 1):
+        left_wheel_velocity = -0.5
+        right_wheel_velocity = 0.5  
     else:                
         if cnt%100==0:
             left_wheel_velocity = random()
@@ -68,11 +83,13 @@ for cnt in range(5000):
     simulationstep()
 
     #check collision with arena walls 
-    if (world.distance(Point(x,y))<L/2):
+    col = world.distance(Point(x,y))
+    if (col<L/2):
         break
         
     if cnt%50==0:
         file.write( str(x) + ", " + str(y) + ", " + str(cos(q)*0.05) + ", " + str(sin(q)*0.05) + "\n")
+        
 
 file.close()
     
