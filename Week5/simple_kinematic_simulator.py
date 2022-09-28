@@ -50,19 +50,19 @@ def simulationstep():
 #################
 file = open("trajectory.dat", "w")
 
-def line_distance(rotation = 0):
+def line_distance(angle = 0):
     global x, y, q, lastRay
     projection = LineString([(x, y), (x+cos(q)*2*W,(y+sin(q)*2*H)) ])  # a line from robot to a point outside arena in direction of q
     lastRay = projection
-    ray = affinity.rotate(projection, rotation, (x,y))
+    ray = affinity.rotate(projection, angle, (x,y))
     s = world.intersection(ray)
-    return sqrt((s.x-x)**2+(s.y-y)**2) #the distance to wall
+    return (sqrt((s.x-x)**2+(s.y-y)**2), angle) #the distance to wall
 
 
 def robot_distance_to_wall():
     angles = [-40, -20, 0, 20, 40]
     distances = list(map(line_distance, angles))
-    return min(distances)
+    return min(distances, key=lambda x: x[0])
 
 
 for cnt in range(10000):
@@ -73,9 +73,14 @@ for cnt in range(10000):
     #distance = sqrt((s.x-x)**2+(s.y-y)**2)                    # distance to wall
     
     #simple controller - change direction of wheels every 10 seconds (100*robot_timestep) unless close to wall then turn on spot
-    if (distance < 0.1):
-        left_wheel_velocity = -0.5
-        right_wheel_velocity = 0.5  
+    if (distance[0] < 0.1):
+        if (distance[1] < 0):
+            left_wheel_velocity = -0.5
+            right_wheel_velocity = 0.5  
+        else:
+            left_wheel_velocity = 0.5
+            right_wheel_velocity = -0.5  
+            
     else:                
         if cnt%100==0:
             left_wheel_velocity = random()
@@ -93,7 +98,7 @@ for cnt in range(10000):
     if cnt%50==0:
         file.write( str(x) + ", " + str(y) + ", " + str(cos(q)*0.05) + ", " + str(sin(q)*0.05) + "\n")
         
-first, last = lastRay.boundary
-file.write(f"{str(x)}, {str(y)}, {last.x}, {last.y} \n")
+last = lastRay.coords[1]
+file.write(f"{str(x)}, {str(y)}, {last[0]}, {last[1]} \n")
 file.close()
     
