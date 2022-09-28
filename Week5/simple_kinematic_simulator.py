@@ -18,6 +18,7 @@ simulation_timestep = 0.01  # timestep in kinematics sim (probably don't touch..
 
 # the world is a rectangular arena with width W and height H
 world = LinearRing([(W/2,H/2),(-W/2,H/2),(-W/2,-H/2),(W/2,-H/2)])
+lastRay = LineString()
 
 # Variables 
 ###########
@@ -50,16 +51,17 @@ def simulationstep():
 file = open("trajectory.dat", "w")
 
 def line_distance(rotation = 0):
-    global x, y, q
-    projection = LineString([(x, y), (x+cos(q)*2*W,-(y+sin(q)*2*H)) ])  # a line from robot to a point outside arena in direction of q
+    global x, y, q, lastRay
+    projection = LineString([(x, y), (x+cos(q)*2*W,(y+sin(q)*2*H)) ])  # a line from robot to a point outside arena in direction of q
+    lastRay = projection
     ray = affinity.rotate(projection, rotation, (x,y))
     s = world.intersection(ray)
-    return sqrt((s.x-x)**2+(s.y-y)**2) 
+    return sqrt((s.x-x)**2+(s.y-y)**2) #the distance to wall
 
 
 def robot_distance_to_wall():
     angles = [-40, -20, 0, 20, 40]
-    distances = map(line_distance, angles)
+    distances = list(map(line_distance, angles))
     return min(distances)
 
 
@@ -71,7 +73,7 @@ for cnt in range(10000):
     #distance = sqrt((s.x-x)**2+(s.y-y)**2)                    # distance to wall
     
     #simple controller - change direction of wheels every 10 seconds (100*robot_timestep) unless close to wall then turn on spot
-    if (distance < 1):
+    if (distance < 0.1):
         left_wheel_velocity = -0.5
         right_wheel_velocity = 0.5  
     else:                
@@ -85,11 +87,13 @@ for cnt in range(10000):
     #check collision with arena walls 
     col = world.distance(Point(x,y))
     if (col<L/2):
+        print("exiting due to leaving arena", cnt)
         break
         
     if cnt%50==0:
         file.write( str(x) + ", " + str(y) + ", " + str(cos(q)*0.05) + ", " + str(sin(q)*0.05) + "\n")
         
-
+first, last = lastRay.boundary
+file.write(f"{str(x)}, {str(y)}, {last.x}, {last.y} \n")
 file.close()
     
