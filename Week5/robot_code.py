@@ -72,28 +72,25 @@ class Thymio:
 
 def main():
     robot = Thymio()
-    left_wheel_velocity = random()   # robot left wheel velocity in radians/s
-    right_wheel_velocity = random()  # robot right wheel velocity in radians/s
+    left_wheel_velocity = random()*200+100   # robot left wheel velocity in radians/s
+    right_wheel_velocity = random()*200+100  # robot right wheel velocity in radians/s
     count = 0
     
     while count < 500:
         count += 1
         robot.drive(left_wheel_velocity,right_wheel_velocity)
-        distances = robot.sens()
-        distance = (min(distances), distances.index(min(distances))-2) # center the sensors around 0, so 0 is straight ahead
-
-        if (distance[0] < 0.1):
-            if (distance[1] < 0):
-                left_wheel_velocity = -0.5
-                right_wheel_velocity = 0.5  
-            else:
-                left_wheel_velocity = 0.5
-                right_wheel_velocity = -0.5  
+        distances = list(map(int, robot.sens()))[::-1]
+        print(distances)
+        distance = (max(distances), distances.index(max(distances))-2) # center the sensors around 0, so 0 is straight ahead
+        print(distance[0])
+        if (distance[0] > 2500):
+            left_wheel_velocity = -100
+            right_wheel_velocity = 100  
                 
         else:                
-            if count%100==0:
-                left_wheel_velocity = random()
-                right_wheel_velocity = random()
+            if count%10==0:
+                left_wheel_velocity = random()*200+100
+                right_wheel_velocity = random()*200+100
         sleep(0.1)
     
     robot.stop()
