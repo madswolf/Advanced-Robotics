@@ -35,7 +35,7 @@ class Thymio:
     def sens(self): # (horizontal[5], ground[2])
         return (
             list(self.aseba.GetVariable("thymio-II", "prox.horizontal"))[:5],
-            list(self.aseba.GetVariable("thymio-II", "prox.ground"))
+            list(self.aseba.GetVariable("thymio-II", "prox.ground.reflected"))
         )
 
     ############## Bus and aseba setup ######################################
