@@ -71,15 +71,19 @@ class Thymio:
 
 # ------------------ Main -------------------------
 
-speed = 200
+robot = Thymio()
 
-Q = np.zeros((4, 3))
+speed = 200
+detection_threshold = 500
+
+Q = np.zeros((4, 4))
 state, action = None, None
 
 # Actions
 forward = 0
 right = 1
 left = 2
+backward = 3
 
 #Obstacle States
 noObs = 0
@@ -87,7 +91,7 @@ obsLeft = 1
 obsRight = 2
 obsAhead = 3
 
-illegal_actions = [(obsLeft, forward), (obsRight, forward), (obsAhead, forward)]
+illegal_actions = [(obsLeft, forward), (obsRight, forward), (obsAhead, forward), (noObs, backward)]
 
 def max_future(state):
     return max(Q[state, 0], Q[state, 1])
@@ -128,9 +132,9 @@ def speed_from_action(action):
     if action == forward:
         left_velo = speed
         right_velo = speed
-    #elif action == backwards:
-    #    left_velo = -speed
-    #    right_velo = -speed
+    elif action == backward:
+        left_velo = -speed
+        right_velo = -speed
     elif action == left:
         left_velo = -speed
         right_velo = speed
@@ -140,42 +144,44 @@ def speed_from_action(action):
     return (left_velo, right_velo)
 
 def main():
-    global state, action
+    global state, action, robot
     robot = Thymio()
     count = 0
+    last_action = 0
     
-    while count < 500:
+    while count < 5000:
         count += 1
         distances = list(map(int, robot.sens()))[::-1]
-        dist_left, dist_right = (max(distances[0], distances[1]), max(distances[3], distances[4]))
-        print(dist_left, dist_right)
+        dist = (max(distances[0], distances[1]), max(distances[3], distances[4]))
+        obs_left = dist[0] > detection_threshold
+        obs_right = dist[1] > detection_threshold
+        print(obs_left, obs_right)
 
-        if count - last_action > randint(100):
+        if count - last_action > 100:
             action = None
 
         if action == None and state != None:
             if random() <= 0.2:
             # explore
-                action = randint(0, 2)
+                action = randint(0,3)
                 while (state, action) in illegal_actions:
-                    action = randint(0,2)
+                    action = randint(0,3)
             else:
                 # exploit
                 action = np.argmax(Q[state])
             last_action = count
         else:
-            new_state = calc_state(dist_left, dist_right)
+            new_state = calc_state(obs_left, obs_right)
             if new_state != state:
                 if action != None:
                     update_table(state, action, new_state)
                 state = new_state
                 action = None
 
-        if count%5==0:
-            speeds = speed_from_action(action)
-            left_speed = speeds[0]
-            right_speed = speeds[1]
-            robot.drive(left_speed, right_speed)
+        speeds = speed_from_action(action)
+        left_speed = speeds[0]
+        right_speed = speeds[1]
+        robot.drive(left_speed, right_speed)
         
         sleep(0.1)
     
@@ -186,6 +192,7 @@ if __name__ == '__main__':
         main()
         os.system("pkill -n asebamedulla")
     except:
+        robot.stop()
         print("Stopping robot")
         exit_now = True
         sleep(5)
