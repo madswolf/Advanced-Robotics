@@ -90,13 +90,10 @@ simulation_timestep = 0.01  # timestep in kinematics sim (probably don't touch..
 
 # the world is a rectangular arena with width W and height H
 world = LinearRing([(W/2,H/2),(-W/2,H/2),(-W/2,-H/2),(W/2,-H/2)])
-boxUpper = LinearRing([(-0.8, 0.4), (-0.8, 0.8), (0.8,0.8), (0.8, 0.4)])
-boxLower = LinearRing([(-0.8, -0.8), (-0.8, -0.4), (0.8, -0.4), (0.8, -0.8)])
+world_edge = LinearRing([(W/2.2,H/2.2),(-W/2.2,H/2.2),(-W/2.2,-H/2.2),(W/2.2,-H/2.2)])
 safeZone = LinearRing([(W/10,H/10),(-W/10,H/10),(-W/10,-H/10),(W/10,-H/10)])
 
-world_all = [world, boxUpper, boxLower]
-lastRay = LineString()
-
+world_all = [world, safeZone]
 # Variables 
 ###########
 
@@ -115,11 +112,20 @@ forward = 0
 right = 1
 left = 2
 
+# potential new actions
+
+sendAvoiderBootFromSafeZone = 3
+
+
 #Obstacle States
 noObs = 0
 obsLeft = 1
 obsRight = 2
 obsAhead = 3
+
+# potential new "obstacle states"
+seekerAhead = 4
+avoiderInSafeZoneAhead = 5
 
 #Zones
 normal = 0
@@ -127,10 +133,14 @@ safe = 1
 edge = 2
 
 illegal_actions = [(obsLeft, forward), (obsRight, forward), (obsAhead, forward)]
+state, action = forward, noObs, normal
 
 # Statistics
 states = []
 actions = []
+
+# Learning (without new states/actions)
+Q = np.zeros((4, 3))
 
 # Methods
 def max_future(state):
@@ -169,15 +179,12 @@ def calc_state(left, right):
 
 
 def line_distance(angle = 0):
-    global x, y, q
+    global x, y, q, lastRay
     projection = LineString([(x, y), (x+cos(q)*2*W,(y+sin(q)*2*H)) ])  # a line from robot to a point outside arena in direction of q
+    lastRay = projection
     ray = affinity.rotate(projection, angle, (x,y))
-    
-    s_lst = [x.intersection(ray) for x in world_all if x.intersects(ray)]
-    for i in range(len(s_lst)):
-        if s_lst[i].type == "MultiPoint": 
-            s_lst[i] = s_lst[i][0]
-    return min([(sqrt((s.x-x)**2+(s.y-y)**2), angle) for s in s_lst]) #the distance to wall
+    s = world.intersection(ray)
+    return (sqrt((s.x-x)**2+(s.y-y)**2), angle) #the distance to wall
 
 
 def robot_distance_to_wall():
@@ -185,8 +192,10 @@ def robot_distance_to_wall():
     distances = list(map(line_distance, angles))
     return (min(distances[0][0], distances[1][0]), min(distances[3][0], distances[4][0]))
 
-def getZone():
 
+# abstraction of the floor sensor
+def getZone():
+    normal
 
 def speed_from_action(action):
     left_velo = 0
@@ -223,8 +232,9 @@ def simulationstep():
 
 file = open("trajectory.dat", "w")
 
+lastRay = LineString()
 last_action = 0
-for cnt in range(10000):
+for cnt in range(100000):
     #simple single-ray sensor
     dist = robot_distance_to_wall()
     dist_left = dist[0] <= distance_threshold
@@ -266,7 +276,7 @@ for cnt in range(10000):
     simulationstep()
 
     #check collision with arena walls 
-    col = min([w.distance(Point(x,y)) for w in world_all])
+    col = world.distance(Point(x,y))
     if col<L/2:
         print("exiting due to leaving arena", cnt)
         break
@@ -274,3 +284,21 @@ for cnt in range(10000):
     if cnt % 10 == 0:
         file.write( str(x) + ", " + str(y) + ", " + str(cos(q)*0.05) + ", " + str(sin(q)*0.05) + "\n")
 
+
+print("Going forwards: " + str(sum([(action == forward) for action in actions])))
+#print("Going backwards: " + str(sum([(action == backwards) for action in actions])))
+print("Going right: " + str(sum([(action == right) for action in actions])))
+print("Going left: " + str(sum([(action == left) for action in actions])))
+print("Total actions: " + str(len(actions)))
+
+print("No obstacles: " + str(sum([(state == noObs) for state in states])))
+print("Obstacle ahead: " + str(sum([(state == obsAhead) for state in states])))
+print("Obstacle right: " + str(sum([(state == obsRight) for state in states])))
+print("Obstacle left: " + str(sum([(state == obsLeft) for state in states])))
+print("Total states: " + str(len(states)))
+
+#last = lastRay.coords[1]
+#file.write(f"{str(x)}, {str(y)}, {last[0]}, {last[1]} \n")
+np.set_printoptions(suppress=True)
+print(Q)
+file.close()
