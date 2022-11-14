@@ -3,9 +3,9 @@ from shapely.geometry import LinearRing, LineString, Point
 
 from .ControllableRobot import ControllableRobot
 
+Simios = []
+
 class Simio(ControllableRobot):
-    
-    
     # Simulation constants
     ###########
     W = 2.0  # width of arena
@@ -28,3 +28,5 @@ class Simio(ControllableRobot):
         self.x = 0.0   # robot position in meters - x direction - positive to the right 
         self.y = 0.0   # robot position in meters - y direction - positive up
         self.q = 0.0   # robot heading with respect to x-axis in radians 
+
+        Simios.append(self)

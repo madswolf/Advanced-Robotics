@@ -4,18 +4,18 @@ class ControllableRobot(ABC):
     def __init__():
         pass
 
-    @abstractmethod(callable)
+    @abstractmethod
     def sens():
         pass
 
-    @abstractmethod(callable)
+    @abstractmethod
     def transmit():
         pass
 
-    @abstractmethod(callable)
+    @abstractmethod
     def drive():
         pass
 
-    @abstractmethod(callable)
+    @abstractmethod
     def stop():
         pass
