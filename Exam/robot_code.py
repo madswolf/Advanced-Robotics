@@ -35,7 +35,9 @@ class Thymio:
     def sens(self): # (horizontal[5], ground[2])
         return (
             list(self.aseba.GetVariable("thymio-II", "prox.horizontal"))[:5],
-            list(self.aseba.GetVariable("thymio-II", "prox.ground.reflected"))
+            list(self.aseba.GetVariable("thymio-II", "prox.ground.reflected")),
+            list(self.aseba.GetVariable("thymio-II", "prox.ground.ambiant")),
+            list(self.aseba.GetVariable("thymio-II", "prox.ground.delta"))
         )
 
     ############## Bus and aseba setup ######################################
@@ -79,10 +81,10 @@ def main():
     #right_wheel_velocity = random()*200+100  # robot right wheel velocity in radians/s
     count = 0
     
-    while count < 500:
+    while count < 501:
         count += 1
         sensor_readings = robot.sens()
-        print(int(sensor_readings[1]))
+        print(",".join(list(map(str, sensor_readings[1]))), ",".join(list(map(str, sensor_readings[2]))), ",".join(list(map(str, sensor_readings[3]))))
         """
         robot.drive(left_wheel_velocity,right_wheel_velocity)
         distances = list(map(int, robot.sens()))[::-1]
