@@ -1,11 +1,8 @@
+import time
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from matplotlib.animation import PillowWriter
+from matplotlib.animation import FuncAnimation, PillowWriter
 import numpy as np
 import os
-import random
-
-history = False
 
 def plot():
     dir_name = os.getcwd() + '/trajectories/'
@@ -39,7 +36,7 @@ ax.set_xlim(minX, maxX)
 ax.set_ylim(minY, maxY)
 
 def animate(i):
-    if not history: ax.clear()
+    ax.clear()
     # Get the point from the points list at index i
     # point = points[i]
     for p in points:
@@ -58,8 +55,9 @@ def animate(i):
 
 
 ani = FuncAnimation(fig, animate, frames=row,
-                    interval=10, repeat=True, repeat_delay=5000)
+                    interval=10, repeat=True, repeat_delay=3000)
 plt.show()
 
 # Save the animation as an animated GIF
-#ani.save("animator/simulation.gif", dpi=300,writer=PillowWriter(fps=10))
+current_time = time.strftime("%m-%d--%H_%M")
+ani.save("trajectories/simulation_" + str(current_time) + ".gif", dpi=300,writer=PillowWriter(fps=10))
