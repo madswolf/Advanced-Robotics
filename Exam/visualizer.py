@@ -3,11 +3,12 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.animation import PillowWriter
 import numpy as np
 import os
+import random
 
-history = True
+history = False
 
 def plot():
-    dir_name = os.getcwd() + '/'
+    dir_name = os.getcwd() + '/trajectories/'
     test = os.listdir(dir_name)
     vectors = []
     for item in test:
@@ -21,19 +22,21 @@ def plot():
     return vectors
 
 points = plot()
-points[0] = points[0][10 - 1::10]
-row, col = points[0].shape
-minX = min(points[0], key=lambda x: x[0])[0] - 0.1
-minY = min(points[0], key=lambda x: x[1])[1] - 0.1
-maxX = max(points[0], key=lambda x: x[0])[0] + 0.1
-maxY = max(points[0], key=lambda x: x[1])[1] + 0.1
-#print(minX, minY, maxX, maxY)
+for i in range(len(points)):
+    points[i] = points[i][10 - 1::10]
+
+shortest_trajectory_index = min(range(len(points)), key=lambda i: len(points[i]))
+row, col = points[shortest_trajectory_index].shape
+
+minX = min([min(p[:, 0]) for p in points]) - 0.1
+maxX = max([max(p[:, 0]) for p in points]) + 0.1
+minY = min([min(p[:, 1]) for p in points]) - 0.1
+maxY = max([max(p[:, 1]) for p in points]) + 0.1
+print(minX, maxX, minY, maxY)
 
 fig, ax = plt.subplots(1, 1)
 ax.set_xlim(minX, maxX)
 ax.set_ylim(minY, maxY)
-
-l = []
 
 def animate(i):
     if not history: ax.clear()
@@ -48,7 +51,7 @@ def animate(i):
         ax.plot(x, y, "-", linewidth=2, color='g')
 
         ax.plot(xs, ys,
-                label='original', marker='o', color='b')
+                label='original', marker='o')
         # Set the x and y axis to display a fixed range
     ax.set_xlim(minX, maxX)
     ax.set_ylim(minY, maxY)
