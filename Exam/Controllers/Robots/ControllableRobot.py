@@ -5,11 +5,11 @@ class ControllableRobot(ABC):
         pass
 
     @abstractmethod
-    def sens():
+    def transmit():
         pass
 
     @abstractmethod
-    def transmit():
+    def receive():
         pass
 
     @abstractmethod
@@ -22,4 +22,12 @@ class ControllableRobot(ABC):
 
     @abstractmethod
     def set_color():
+        pass
+
+    @abstractmethod
+    def get_state():
+        pass
+
+    @abstractmethod
+    def get_zone():
         pass
