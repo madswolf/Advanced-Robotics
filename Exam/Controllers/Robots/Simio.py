@@ -18,6 +18,9 @@ class Simio(ControllableRobot):
     distance_threshold = 0.15  # distance threshold for collision avoidance
     robot_timestep = 0.1        # 1/robot_timestep equals update frequency of robot
     simulation_timestep = 0.01  # timestep in kinematics sim (probably don't touch..)
+    receive_range = 0.5
+    camera_range = 0.5
+
 
     def simulationstep(self):
         for step in range(int(Simio.robot_timestep/Simio.simulation_timestep)):     #step model time/timestep times
@@ -56,8 +59,7 @@ class Simio(ControllableRobot):
         return Point(self.x, self.y).intersects(Polygon(Simio.safeZone))
 
     def placement_in_view(self, other):
-        view_range = 0.5
-        view_triangle = Polygon(LinearRing([(self.x, self.y), (self.x+cos(self.q)*view_range,(self.y+sin(self.q)*view_range)), (self.x+cos(self.q+pi/2)*view_range,(self.y+sin(self.q+pi/2)*view_range))]))
+        view_triangle = Polygon(LinearRing([(self.x, self.y), (self.x+cos(self.q)*self.camera_range,(self.y+sin(self.q)*self.camera_range)), (self.x+cos(self.q+pi/2)*self.camera_range,(self.y+sin(self.q+pi/2)*self.camera_range))]))
         if view_triangle.overlaps(other.robot_circle):
             ## is on left side of robot
             if (other.x-self.x)*cos(self.q) + (other.y-self.y)*sin(self.q) > 0.2:
@@ -144,9 +146,8 @@ class Simio(ControllableRobot):
         self.current_message = message
 
     def receive(self):
-        receive_range = 0.5
-        front_triangle = Polygon(LinearRing([(self.x, self.y), (self.x+cos(self.q)*receive_range,(self.y+sin(self.q)*receive_range)), (self.x+cos(self.q+pi/2)*receive_range,(self.y+sin(self.q+pi/2)*receive_range))]))
-        back_triangle = Polygon(LinearRing([(self.x, self.y), (self.x+cos(self.q)*receive_range,(self.y+sin(self.q)*receive_range)), (self.x+cos(self.q-pi/2)*receive_range,(self.y+sin(self.q-pi/2)*receive_range))]))
+        front_triangle = Polygon(LinearRing([(self.x, self.y), (self.x+cos(self.q)*self.receive_range,(self.y+sin(self.q)*self.receive_range)), (self.x+cos(self.q+pi/2)*self.receive_range,(self.y+sin(self.q+pi/2)*self.receive_range))]))
+        back_triangle = Polygon(LinearRing([(self.x, self.y), (self.x+cos(self.q)*self.receive_range,(self.y+sin(self.q)*self.receive_range)), (self.x+cos(self.q-pi/2)*self.receive_range,(self.y+sin(self.q-pi/2)*self.receive_range))]))
         for simio in Simios:
             if simio == self:
                 continue
