@@ -19,3 +19,7 @@ class ControllableRobot(ABC):
     @abstractmethod
     def stop():
         pass
+
+    @abstractmethod
+    def set_color():
+        pass

@@ -1,4 +1,4 @@
-class Zones(Enum):
+class Zones():
     Normal = 0
     Safe = 1
 

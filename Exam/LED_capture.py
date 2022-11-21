@@ -27,7 +27,7 @@ def main():
   frame = cv2.imread(tmpname)[190:,:] #crop to 640x290 and taking the bottom part
   
 
-  process(frame)
+  process(frame, "red")
 
   os.remove(tmpname)
   return
@@ -70,17 +70,30 @@ def process(frame, color):
   """
   hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
   
-  if color == "blue":
-    lower = np.array([0,0,0])
-    upper = np.array([0,0,0])
-  if color == "red":
-    lower = np.array([170,25,0])
-    upper = np.array([205,255,255])
-  else:
-    lower = np.array([170,25,0])
-    upper = np.array([205,255,255])
+  if color == "green":
+    lower = (20, 25, 50)
+    upper = (70, 255, 255)
+  elif color == "orange":
+    lower = (10, 25, 50)
+    upper = (40, 255, 255)
+  elif color == "red":
+    first_lower = (0, 25, 50)
+    first_upper = (10, 255, 255)
+    second_lower = (170, 25, 50)
+    second_upper = (180, 255, 255)
+  elif color == "blue":
+    lower = (110, 25, 50)
+    upper = (130, 255, 255)
+  else: # old red
+    lower = (170,25,0)
+    upper = (205,255,255)
 
-  color_filter = cv2.inRange(hsv, lower, upper)
+  if color == "red":
+    mask1 = cv2.inRange(hsv, first_lower, first_upper)
+    mask2 = cv2.inRange(hsv, second_lower, second_upper)
+    color_filter = cv2.bitwise_or(mask1, mask2)
+  else:
+    color_filter = cv2.inRange(hsv, lower, upper)
   #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
   
   thresh = cv2.threshold(color_filter, 60, 255, cv2.THRESH_BINARY)[1]
