@@ -4,6 +4,7 @@ from shapely.geometry import LinearRing, LineString, Point
 import numpy as np
 from numpy import sin, cos, pi, sqrt
 from random import randint, random
+import thymio
 
 #!/usr/bin/python3
 import os
@@ -16,64 +17,6 @@ from time import sleep
 import dbus
 import dbus.mainloop.glib
 from threading import Thread
-
-
-class Thymio:
-    def __init__(self):
-        self.aseba = self.setup()
-
-    def drive(self, left_wheel_speed, right_wheel_speed):
-        print("Left_wheel_speed: " + str(left_wheel_speed))
-        print("Right_wheel_speed: " + str(right_wheel_speed))
-
-        left_wheel = left_wheel_speed
-        right_wheel = right_wheel_speed
-
-        self.aseba.SendEventName("motor.target", [left_wheel, right_wheel])
-
-    def stop(self):
-        left_wheel = 0
-        right_wheel = 0
-        self.aseba.SendEventName("motor.target", [left_wheel, right_wheel])
-
-    def sens(self): # (horizontal[5], ground[2])
-        return (
-            list(self.aseba.GetVariable("thymio-II", "prox.horizontal"))[:5],
-            list(self.aseba.GetVariable("thymio-II", "prox.ground"))
-        )
-
-    ############## Bus and aseba setup ######################################
-
-    def setup(self):
-        print("Setting up")
-        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-        bus = dbus.SessionBus()
-        asebaNetworkObject = bus.get_object('ch.epfl.mobots.Aseba', '/')
-
-        asebaNetwork = dbus.Interface(
-            asebaNetworkObject, dbus_interface='ch.epfl.mobots.AsebaNetwork'
-        )
-        # load the file which is run on the thymio
-        asebaNetwork.LoadScripts(
-            'thympi.aesl', reply_handler=self.dbusError, error_handler=self.dbusError
-        )
-
-        # scanning_thread = Process(target=robot.drive, args=(200,200,))
-        return asebaNetwork
-
-    def stopAsebamedulla(self):
-        os.system("pkill -n asebamedulla")
-
-    def dbusReply(self):
-        # dbus replys can be handled here.
-        # Currently ignoring
-        pass
-
-    def dbusError(self, e):
-        # dbus errors can be handled here.
-        # Currently only the error is logged. Maybe interrupt the mainloop here
-        print("dbus error: %s" % str(e))
-
 
 # A prototype simulation of a differential-drive robot with one sensor
 
@@ -94,18 +37,6 @@ world_edge = LinearRing([(W/2.2,H/2.2),(-W/2.2,H/2.2),(-W/2.2,-H/2.2),(W/2.2,-H/
 safeZone = LinearRing([(W/10,H/10),(-W/10,H/10),(-W/10,-H/10),(W/10,-H/10)])
 
 world_all = [world, safeZone]
-# Variables 
-###########
-
-x = 0.0   # robot position in meters - x direction - positive to the right 
-y = 0.0   # robot position in meters - y direction - positive up
-q = 0.0   # robot heading with respect to x-axis in radians 
-
-speed = 0.2
-distance_threshold = 0.15
-
-left_wheel_velocity = speed   # robot left wheel velocity in radians/s
-right_wheel_velocity = speed  # robot right wheel velocity in radians/s
 
 # Actions
 forward = 0
