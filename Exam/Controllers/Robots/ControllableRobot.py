@@ -19,3 +19,11 @@ class ControllableRobot(ABC):
     @abstractmethod
     def stop():
         pass
+
+    @abstractmethod
+    def get_state():
+        pass
+
+    @abstractmethod
+    def get_zone():
+        pass

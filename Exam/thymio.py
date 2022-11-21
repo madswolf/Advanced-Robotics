@@ -1,3 +1,7 @@
+import os
+import dbus
+import dbus.mainloop.glib
+
 class Thymio:
     def __init__(self):
         self.aseba = self.setup()
