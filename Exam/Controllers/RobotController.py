@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from random import random, randint
+import sys
+sys.path.append("..")
+
 
 from .Robots.ControllableRobot import ControllableRobot
-from ..Models.States import States
-from ..Models.Actions import  Actions
-from ..Models.Zones import Zones
+from Models.States import States
+from Models.Actions import Actions
+from Models.Zones import Zones
 
 
 class RobotController(ABC):
@@ -16,19 +19,27 @@ class RobotController(ABC):
         self.State = None
         self.Zone = None
         self.Action = None
-        self.Speed = 0.2
+        self.Speed = 1
         self.Distance_threshold = 0.15
         self.Robot = robot
         self.Last_action = -9999
 
         #Learning (Actions, states, zones
-        self.Q = np.zeros((4,10,3))
+        self.Q = np.zeros((3,10,5))
+        self.Illegal_zone_actions = [
+            (Actions.Forward, Zones.EdgeFront),
+            (Actions.Forward, Zones.EdgeLeft),
+            (Actions.Forward, Zones.EdgeRight)
+        ]
+        self.Illegal_state_actions = [
+            # when a robot is in the way, seen with robot_in_way, then forward illegal
+        ]
         self.Illegal_actions = []
 
 
     #Abstract Methods
     @abstractmethod
-    def get_reward(self, state, action):
+    def get_reward(self, action, state, zone):
         pass
 
 
@@ -41,38 +52,48 @@ class RobotController(ABC):
             self.Action = None
 
         if new_state != self.State or new_zone != self.Zone or self.Action is None:
-            self.Zone = new_zone
-            self.State = new_state
+            new_zone
+            new_state
+            
+            if self.Action != None:
+                self.update_table(self.Action, self.State, new_state, self.Zone, new_zone)
+
             if random() <= 0.2:
             # explore
                 action = randint(0, 2)
-                while (self.State, action) in self.Illegal_actions:
+                while (action, new_zone) in self.Illegal_zone_actions or (action, new_state) in self.Illegal_state_actions or (action, new_state, new_zone) in self.Illegal_actions:
                     action = randint(0,2)
                 self.Action = action
             else:
                 # exploit
-                self.Action = np.argmax(self.Q[self.State])
+                self.Action = self.best_action(new_state, new_zone)
             self.Last_action = count
-
+        
         if count % 5 == 0:
-            speeds = self.speed_from_action()
+            speeds = self.speed_from_action(self.Action)
             self.Robot.drive(speeds[0], speeds[1])
         
 
-    def max_future(self):
-        return max(self.Q[self.State, 0], self.Q[self.State, 1])
+    def max_future(self, state, zone):
+        return np.max(self.Q[:, state, zone])
 
-    def best_action(self):
-        return np.argmax(self.Q[self.State])
+    def best_action(self, state, zone):
+        return np.argmax(self.Q[:, state, zone])
 
-    def update_table(self, state, action, new_state):
+    def update_table(self, action, state, new_state, zone, new_zone):
         alpha = 0.1
         gamma = 0.9
-        reward = self.get_reward(action)
-        self.q[state, action] = self.q[state, action] + alpha * (reward + gamma * self.max_future(new_state) - self.q[state, action])
+        reward = self.get_reward(action, new_state, new_zone)
+        self.Q[action, state, zone] = self.Q[action, state, zone] + alpha * (reward + gamma * self.max_future(new_state, new_zone) - self.Q[action, new_state, new_zone])
+
+        for act in self.Illegal_zone_actions:
+            self.Q[act[0], :, act[1]] = -10
+
+        for act in self.Illegal_state_actions:
+            self.Q[act[0], act[1], :] = -10
 
         for act in self.Illegal_actions: #don't weight illegal actions positively
-            self.q[act[0], act[1]] = -10
+            self.Q[act[0], act[1], act[2]] = -10
 
 
     def speed_from_action(self, action):

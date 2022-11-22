@@ -1,33 +1,37 @@
 from abc import ABC, abstractmethod
 
 class ControllableRobot(ABC):   
-    def __init__():
+    def __init__(self):
         pass
 
     @abstractmethod
-    def transmit():
+    def transmit(self, message):
         pass
 
     @abstractmethod
-    def receive():
+    def receive(self):
         pass
 
     @abstractmethod
-    def drive():
+    def drive(self, speed_left, speed_right):
         pass
 
     @abstractmethod
-    def stop():
+    def stop(self):
         pass
 
     @abstractmethod
-    def set_color():
+    def set_color(self, color):
         pass
 
     @abstractmethod
-    def get_state():
+    def get_state(self):
         pass
 
     @abstractmethod
-    def get_zone():
+    def get_zone(self):
+        pass
+
+    @abstractmethod
+    def robot_in_way(self):
         pass

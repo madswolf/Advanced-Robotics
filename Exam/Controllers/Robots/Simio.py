@@ -1,8 +1,10 @@
+import time
 from shapely import affinity
 from shapely.geometry import LinearRing, LineString, Point, Polygon
 import numpy as np
 from numpy import sin, cos, pi, sqrt
-from Models import Zones, Actions, States, Colors
+from Models import Zones, States, Colors
+import os
 
 from .ControllableRobot import ControllableRobot
 
@@ -21,7 +23,6 @@ class Simio(ControllableRobot):
     receive_range = 0.5
     camera_range = 0.5
 
-
     def simulationstep(self):
         for step in range(int(Simio.robot_timestep/Simio.simulation_timestep)):     #step model time/timestep times
             v_x = cos(self.q)*(Simio.R*self.left_wheel_velocity/2 + Simio.R*self.right_wheel_velocity/2) 
@@ -31,6 +32,9 @@ class Simio(ControllableRobot):
             self.x += v_x * Simio.simulation_timestep
             self.y += v_y * Simio.simulation_timestep
             self.q += omega * Simio.simulation_timestep
+            if step % 5 == 0:
+                self.file.write( str(self.x) + ", " + str(self.y) + ", " + str(cos(self.q)*0.05) + ", " + str(sin(self.q)*0.05) + "\n")
+                
     
     # the world is a rectangular arena with width W and height H
     world = LinearRing([(W/2,H/2),(-W/2,H/2),(-W/2,-H/2),(W/2,-H/2)])
@@ -52,7 +56,24 @@ class Simio(ControllableRobot):
         return distances
 
     def is_on_world_edge(self):
-        return self.robot_circle.intersects(Polygon(Simio.world_edge.exterior))
+        projection = LineString([(self.x, self.y), (self.x+cos(self.q)*2*Simio.W,(self.y+sin(self.q)*2*Simio.H)) ])  # a line from robot to a point outside arena in direction of q
+        intersection = projection.intersection(Polygon(Simio.world_edge).exterior)
+        distance_to_intersection = intersection.distance(Point(self.x, self.y))
+        if distance_to_intersection < Simio.L:
+            intersectionX, intersectionY = intersection.xy
+            angle_of_intersection = np.arctan2(intersectionY-self.y, intersectionX-self.x)
+            # is in front of robot within 20 degrees
+            if abs(angle_of_intersection - self.q) < pi/9:
+                return (True, 'front')
+            # is on left side
+            elif angle_of_intersection - self.q > 0:
+                return (True, 'left')
+            # is on right side
+            else: 
+                return (True, 'right')
+
+        else:
+            return (False, 'none')
 
     def is_in_safe_zone(self):
         # middle of robot is in safe zone
@@ -76,10 +97,17 @@ class Simio(ControllableRobot):
     def get_zone(self):
         if self.is_in_safe_zone():
             return Zones.Safe
-        elif self.is_on_world_edge():
-            return Zones.Edge
-        else:
-            return Zones.Normal
+        else: 
+            edge_status = self.is_on_world_edge()
+            if edge_status[0]:
+                if edge_status[1] == 'front':
+                    return Zones.EdgeFront
+                elif edge_status[1] == 'left':
+                    return Zones.EdgeLeft
+                elif edge_status[1] == 'right':
+                    return Zones.EdgeRight
+            else:
+                return Zones.Normal
 
     def get_state(self):
         for simio in Simios:
@@ -136,6 +164,9 @@ class Simio(ControllableRobot):
         self.left_wheel_velocity = 0.0
         self.right_wheel_velocity = 0.0
         self.color = Colors.Blue
+        
+        current_time = time.strftime("%m-%d--%H_%M")
+        self.file = open(os.getcwd()+"/Exam/trajectories/trajectory_" +  str(current_time) + ".dat", "w")
 
         Simios.append(self)
 

@@ -1,13 +1,14 @@
 import sys
-from Controllers import AvoiderController, RobotController, SeekerController
-from Controllers.Robots import ControllableRobot, Thymio, Simio
+import Controllers as Controllers
+import Controllers.Robots as Robots
 
-robot:ControllableRobot = Simio() if "--simulated" in sys.argv else Thymio()
+robot = Robots.Simio() if "--simulated" in sys.argv else Robots.Thymio()
 
-controller = AvoiderController(robot) if sys.argv[1] == "avoider" else SeekerController(robot) if sys.argv[1] == "seeker" else None
-if controller is None: raise f"Illegal robot type: {sys.argv[1]}"
+controller = Controllers.AvoiderController(robot) if sys.argv[1] == "avoider" else Controllers.SeekerController(robot) if sys.argv[1] == "seeker" else None
+if controller is None: 
+    raise Exception(f"Illegal robot type: {sys.argv[1]}")
 
 
-count = 500
+count = 10000
 for i in range(count):
-    controller.act(count)
+    controller.step(count)

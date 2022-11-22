@@ -3,4 +3,7 @@ class Zones():
     Safe = 1
 
     #expand with left right ahead for easier learning?
-    Edge = 2
+    EdgeFront = 2
+    EdgeLeft = 3
+    EdgeRight = 4
+    
