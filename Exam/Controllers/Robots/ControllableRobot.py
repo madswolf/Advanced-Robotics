@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 class ControllableRobot(ABC):   
     def __init__(self):
-        pass
+        self.tagged = False
 
     @abstractmethod
     def transmit(self, message):

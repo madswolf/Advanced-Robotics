@@ -5,10 +5,15 @@ import numpy as np
 from numpy import sin, cos, pi, sqrt
 from Models import Zones, States, Colors
 import os
+import random
+from math import atan, radians, cos, sin
 
 from .ControllableRobot import ControllableRobot
 
 Simios = []
+
+start_positions = [(-0.8, -0.8), (-0.8, 0.8), (0.8, 0.8), (0.8, -0.8), (0.0, 0.0)] # seeker is always last
+names = ["Hamilton", "Stroll", "Lando", "Alonso", "Verstappen"]
 
 class Simio(ControllableRobot):
     # Simulation constants
@@ -20,9 +25,28 @@ class Simio(ControllableRobot):
     distance_threshold = 0.15  # distance threshold for collision avoidance
     robot_timestep = 0.1        # 1/robot_timestep equals update frequency of robot
     simulation_timestep = 0.01  # timestep in kinematics sim (probably don't touch..)
-    receive_range = 0.5
+    receive_range = 0.4
     camera_range = 0.5
 
+    def __init__(self):
+        super().__init__()
+        self.TimeStep = 0.1
+
+        self.name = names[len(Simios)]
+        self.x = start_positions[len(Simios)][0]   # robot position in meters - x direction - positive to the right 
+        self.y = start_positions[len(Simios)][1]   # robot position in meters - y direction - positive up
+        self.q = random.random() * pi  # robot heading with respect to x-axis in radians 
+        self.robot_circle = Point(self.x, self.y).buffer(Simio.L)
+        self.left_wheel_velocity = 0.0
+        self.right_wheel_velocity = 0.0
+        self.color = Colors.Blue
+        self.current_message = "0"
+        
+        Simios.append(self)
+        
+        current_time = time.strftime("%m-%d--%H_%M")
+        self.file = open(os.getcwd()+"/Exam/trajectories/trajectory_" +  str(current_time) + "_" + self.name + ".dat", "w")
+        
     def simulationstep(self):
         for step in range(int(Simio.robot_timestep/Simio.simulation_timestep)):     #step model time/timestep times
             v_x = cos(self.q)*(Simio.R*self.left_wheel_velocity/2 + Simio.R*self.right_wheel_velocity/2) 
@@ -32,6 +56,7 @@ class Simio(ControllableRobot):
             self.x += v_x * Simio.simulation_timestep
             self.y += v_y * Simio.simulation_timestep
             self.q += omega * Simio.simulation_timestep
+            self.robot_circle = Point(self.x, self.y).buffer(Simio.L)
             if step % 5 == 0:
                 self.file.write( str(self.x) + ", " + str(self.y) + ", " + str(cos(self.q)*0.05) + ", " + str(sin(self.q)*0.05) + "\n")
                 
@@ -61,9 +86,10 @@ class Simio(ControllableRobot):
         distance_to_intersection = intersection.distance(Point(self.x, self.y))
         if distance_to_intersection < Simio.L:
             intersectionX, intersectionY = intersection.xy
-            angle_of_intersection = np.arctan2(intersectionY-self.y, intersectionX-self.x)
+
+            angle_of_intersection = np.arctan2(intersectionY[0]-self.y, intersectionX[0]-self.x)
             # is in front of robot within 20 degrees
-            if abs(angle_of_intersection - self.q) < pi/9:
+            if abs(angle_of_intersection - self.q) < radians(30):
                 return (True, 'front')
             # is on left side
             elif angle_of_intersection - self.q > 0:
@@ -151,39 +177,40 @@ class Simio(ControllableRobot):
             for distance in distances:
                 if distance[0] is not None and distance[0] < Simio.distance_threshold:
                     return (True, distance[1])
-            
-
-    def __init__(self):
-        super().__init__()
-        self.TimeStep = 0.1
-
-        self.x = 0.0   # robot position in meters - x direction - positive to the right 
-        self.y = 0.0   # robot position in meters - y direction - positive up
-        self.q = 0.0   # robot heading with respect to x-axis in radians 
-        self.robot_circle = Point(self.x, self.y).buffer(Simio.L)
-        self.left_wheel_velocity = 0.0
-        self.right_wheel_velocity = 0.0
-        self.color = Colors.Blue
-        
-        current_time = time.strftime("%m-%d--%H_%M")
-        self.file = open(os.getcwd()+"/Exam/trajectories/trajectory_" +  str(current_time) + ".dat", "w")
-
-        Simios.append(self)
 
     def set_color(self, color):
         self.color = color
-    
+
     def transmit(self, message):
         self.current_message = message
 
     def receive(self):
-        front_triangle = Polygon(LinearRing([(self.x, self.y), (self.x+cos(self.q)*self.receive_range,(self.y+sin(self.q)*self.receive_range)), (self.x+cos(self.q+pi/2)*self.receive_range,(self.y+sin(self.q+pi/2)*self.receive_range))]))
-        back_triangle = Polygon(LinearRing([(self.x, self.y), (self.x+cos(self.q)*self.receive_range,(self.y+sin(self.q)*self.receive_range)), (self.x+cos(self.q-pi/2)*self.receive_range,(self.y+sin(self.q-pi/2)*self.receive_range))]))
+        front_fov = radians(30)
+        
+        angle = self.q
+        x1 = self.x + cos(angle + front_fov) * Simio.receive_range
+        x2 = self.x + cos(angle - front_fov) * Simio.receive_range
+        y1 = self.y + sin(angle + front_fov) * Simio.receive_range
+        y2 = self.y + sin(angle - front_fov) * Simio.receive_range
+        front_triangle = Polygon(LinearRing([(self.x, self.y), (x1, y1), (x2, y2)]))
+
+        angle2 = angle+radians(180)
+        back_fov = radians(15)
+        x1b = self.x + cos(angle2 + back_fov) * Simio.receive_range
+        x2b = self.x + cos(angle2 - back_fov) * Simio.receive_range
+        y1b = self.y + sin(angle2 + back_fov) * Simio.receive_range
+        y2b = self.y + sin(angle2 - back_fov) * Simio.receive_range
+        back_triangle = Polygon(LinearRing([(self.x, self.y), (x1b, y1b), (x2b, y2b)]))
+        
         for simio in Simios:
             if simio == self:
                 continue
             if front_triangle.intersects(simio.robot_circle) or back_triangle.intersects(simio.robot_circle):
-                return simio.current_message
+                if -radians(30) < simio.q - self.q < radians(30) or \
+                   -radians(15) < abs(simio.q - self.q) % pi < radians(15):
+                    if simio.current_message == "1":
+                        return simio.current_message
+        return None
 
     def drive(self, left_speed, right_speed):
         self.left_wheel_velocity = left_speed
