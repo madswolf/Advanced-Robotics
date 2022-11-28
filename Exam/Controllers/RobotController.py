@@ -30,12 +30,14 @@ class RobotController(ABC):
         self.illegal_zone_actions = [
             (Actions.Forward, Zones.EdgeFront),
             (Actions.Forward, Zones.EdgeLeft),
-            (Actions.Forward, Zones.EdgeRight)
+            (Actions.Forward, Zones.EdgeRight),
+            (Actions.Left, Zones.EdgeLeft),
+            (Actions.Right, Zones.EdgeRight),
         ]
-        self.iIllegal_state_actions = [
+        self.illegal_state_actions = [
             # when a robot is in the way, seen with robot_in_way, then forward illegal
         ]
-        self.iIllegal_actions = []
+        self.illegal_actions = []
 
 
     #Abstract Methods
@@ -53,27 +55,29 @@ class RobotController(ABC):
         if count - self.last_action > 100:
             self.action = None
 
-        if new_state != self.state or new_zone != self.zone or self.action is None:
-            new_zone
-            new_state
-            
-            if self.action != None:
-                self.update_table(self.action, self.state, new_state, self.zone, new_zone)
+        is_robot_in_way = self.robot.robot_in_way()
+        if is_robot_in_way[0]: 
+            avoid_action = Actions.Left if is_robot_in_way[1] < 0 else Actions.Right
+            speeds = self.speed_from_action(avoid_action)
+        else:
+            if (new_state != self.state or new_zone != self.zone or self.action is None):
+                if self.action != None:
+                    self.update_table(self.action, self.state, new_state, self.zone, new_zone)
 
-            if random() <= 0.2:
-            # explore
-                action = randint(0, 2)
-                while (action, new_zone) in self.illegal_zone_actions or (action, new_state) in self.iIllegal_state_actions or (action, new_state, new_zone) in self.iIllegal_actions:
-                    action = randint(0,2)
-                self.action = action
-            else:
-                # exploit
-                self.action = self.best_action(new_state, new_zone)
-            self.last_action = count
+                if random() <= 0.2:
+                # explore
+                    action = randint(0, 2)
+                    while (action, new_zone) in self.illegal_zone_actions or (action, new_state) in self.illegal_state_actions or (action, new_state, new_zone) in self.illegal_actions:
+                        action = randint(0,2)
+                    self.action = action
+                else:
+                    # exploit
+                    self.action = self.best_action(new_state, new_zone)
+                self.last_action = count
+                
+            speeds = self.speed_from_action(self.action)        
         
-        if count % 5 == 0:
-            speeds = self.speed_from_action(self.action)
-            self.robot.drive(speeds[0], speeds[1])
+        self.robot.drive(*speeds)        
         
 
     def max_future(self, state, zone):
@@ -91,10 +95,10 @@ class RobotController(ABC):
         for act in self.illegal_zone_actions:
             self.Q[act[0], :, act[1]] = -10
 
-        for act in self.iIllegal_state_actions:
+        for act in self.illegal_state_actions:
             self.Q[act[0], act[1], :] = -10
 
-        for act in self.iIllegal_actions: #don't weight illegal actions positively
+        for act in self.illegal_actions: #don't weight illegal actions positively
             self.Q[act[0], act[1], act[2]] = -10
 
 

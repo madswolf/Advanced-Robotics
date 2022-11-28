@@ -24,4 +24,4 @@ else:
 count = 10000
 for i in range(count):
     for c in controllers:
-        c.step(count)
+        c.step(i)

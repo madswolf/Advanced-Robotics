@@ -22,7 +22,7 @@ def color_from_file(file):
 
 def plot():
     global files
-    dir_name = os.getcwd() + '/Exam/trajectories/'
+    dir_name = os.getcwd() + '/Exam/visualization/trajectories/'
     files = os.listdir(dir_name)
     files.sort(reverse=True)
     files = files[:5]
@@ -57,11 +57,10 @@ ax.set_ylim(minY, maxY)
 def animate(i):
     global files
     ax.clear()
-    ax.axvline(x=-1, color="r", linestyle="--")
-    ax.axvline(x=1, color="r", linestyle="--")
-    ax.axhline(y=1, color="r", linestyle="--")
-    ax.axhline(y=-1, color="r", linestyle="--")
+    ax.add_patch(plt.Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1)], color="r", linestyle="--", fill= False))
+    ax.add_patch(plt.Polygon([[-0.2, -0.2], [-0.2, 0.2], [0.2, 0.2], [0.2, -0.2]], color="gray", alpha=0.5, fill = True))
     
+
     # Get the point from the points list at index i
     # point = points[i]
     for idx, p in enumerate(points):
@@ -96,8 +95,17 @@ def animate(i):
         circle = plt.Circle((xs, ys), 0.095, color=color_from_file(files[idx]), alpha=0.2)
         ax.add_patch(circle)
 
-        # Plot that point using the x and y coordinates
+        #check if x,y,xs,ys 20 steps ahead is the same as x,y,xs,ys now
+        if i < len(p) - 20:
+            xs20 = p[i+19, 0]
+            ys20 = p[i+20, 1]
+            x20 = [xs20, p[i+19, 2] + xs20]
+            y20 = [ys20, p[i+20, 3] + ys20]
+            if x == x20 and y == y20:
+                ax.text(xs + 0.05, ys, "TAGGED", fontsize=15, color=color_from_file(files[idx]))
         
+        # Plot that point using the x and y coordinates
+
         ax.plot(x, y, "-", linewidth=2, color=color_from_file(files[idx]))
         
         ax.plot(xs, ys,

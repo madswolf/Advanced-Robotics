@@ -45,7 +45,7 @@ class Simio(ControllableRobot):
         Simios.append(self)
         
         current_time = time.strftime("%m-%d--%H_%M")
-        self.file = open(os.getcwd()+"/Exam/trajectories/trajectory_" +  str(current_time) + "_" + self.name + ".dat", "w")
+        self.file = open(os.getcwd()+"/Exam/visualization/trajectories/trajectory_" +  str(current_time) + "_" + self.name + ".dat", "w")
         
     def simulationstep(self):
         for step in range(int(Simio.robot_timestep/Simio.simulation_timestep)):     #step model time/timestep times
@@ -88,7 +88,7 @@ class Simio(ControllableRobot):
             intersectionX, intersectionY = intersection.xy
 
             angle_of_intersection = np.arctan2(intersectionY[0]-self.y, intersectionX[0]-self.x)
-            # is in front of robot within 20 degrees
+            # is in front of robot within 30 degrees
             if abs(angle_of_intersection - self.q) < radians(30):
                 return (True, 'front')
             # is on left side
@@ -102,8 +102,9 @@ class Simio(ControllableRobot):
             return (False, 'none')
 
     def is_in_safe_zone(self):
-        # middle of robot is in safe zone
-        return Point(self.x, self.y).intersects(Polygon(Simio.safeZone))
+        # line of length L from robot in direction of q
+        projection = LineString([(self.x, self.y), (self.x+cos(self.q)*Simio.L*0.4,(self.y+sin(self.q)*Simio.L*0.4))])
+        return projection.intersects(Polygon(Simio.safeZone))
 
     def placement_in_view(self, other):
         view_triangle = Polygon(LinearRing([(self.x, self.y), (self.x+cos(self.q)*self.camera_range,(self.y+sin(self.q)*self.camera_range)), (self.x+cos(self.q+pi/2)*self.camera_range,(self.y+sin(self.q+pi/2)*self.camera_range))]))
@@ -136,47 +137,67 @@ class Simio(ControllableRobot):
                 return Zones.Normal
 
     def get_state(self):
-        for simio in Simios:
-            if simio == self:
-                continue
-            color = simio.color
-            location = self.placement_in_view(simio)
+        simios = list(filter(lambda sim: sim != self and self.placement_in_view(sim) is not None and not sim.tagged, Simios))
 
-            if location is not None:
-                if color == Colors.Red:
-                    if location == 'left':
-                        return States.SeekerLeft
-                    elif location == 'right':
-                        return States.SeekerRight
-                    else:
-                        return States.SeekerFront
+        seekers = [x for x in simios if x.color in [Colors.Red, Colors.Orange]]
+        avoiders = [x for x in simios if x.color in [Colors.Blue]]
+        avoiders_safe_zone = [x for x in simios if x.color in [Colors.Green]]
 
-                elif color == Colors.Blue:
-                    if location == 'left':
-                        return States.AvoiderLeft
-                    elif location == 'right':
-                        return States.AvoiderRight
-                    else:
-                        return States.AvoiderFront
+        simio = None
+        if not len(seekers) == 0:
+            simio = seekers[0]
+        elif not len(avoiders) == 0:
+            # get the closest avoider
+            simio = min(avoiders, key=lambda x: x.robot_circle.distance(Point(self.x, self.y)))
+        elif not len(avoiders_safe_zone) == 0:
+            simio = avoiders_safe_zone[0]
+        else:
+            return States.NoObs
 
-                elif color == Colors.Green:
-                    if location == 'left':
-                        return States.AvoiderInSafeZoneLeft
-                    elif location == 'right':
-                        return States.AvoiderInSafeZoneRight
-                    else:
-                        return States.AvoiderInSafeZoneFront
+        location = self.placement_in_view(simio)
+        color = simio.color
+        
+        if location is not None:
+            if color == Colors.Red or color == Colors.Orange:
+                if location == 'left':
+                    return States.SeekerLeft
+                elif location == 'right':
+                    return States.SeekerRight
+                else:
+                    return States.SeekerFront
+
+            elif color == Colors.Blue:
+                if location == 'left':
+                    return States.AvoiderLeft
+                elif location == 'right':
+                    return States.AvoiderRight
+                else:
+                    return States.AvoiderFront
+
+            elif color == Colors.Green:
+                if location == 'left':
+                    return States.AvoiderInSafeZoneLeft
+                elif location == 'right':
+                    return States.AvoiderInSafeZoneRight
+                else:
+                    return States.AvoiderInSafeZoneFront
 
         return States.NoObs
+        
 
     def robot_in_way(self):
+        within_threshold = []
         for simio in Simios:
             if simio == self:
                 continue
             distances = self.distance_to_robot(simio)
-            for distance in distances:
-                if distance[0] is not None and distance[0] < Simio.distance_threshold:
-                    return (True, distance[1])
+            distances.sort(key = lambda x: 999 if x[0] is None else x[0])
+            if distances[0][0] is not None and distances[0][0] < Simio.distance_threshold:
+                within_threshold.append((distances[0][0], distances[0][1])) # True, angle
+        within_threshold.sort(key = lambda x: x[0]) # sort by distance
+        if len(within_threshold) > 0:
+            return (True, within_threshold[0][1]) # True, angle
+        return (False, None) # no robot in way
 
     def set_color(self, color):
         self.color = color
@@ -218,7 +239,5 @@ class Simio(ControllableRobot):
         self.simulationstep()
 
     def stop(self):
-        self.left_wheel_velocity = 0.0
-        self.right_wheel_velocity = 0.0
-        self.simulationstep()
+        self.drive(0,0)
     
