@@ -5,3 +5,5 @@ class Actions:
 
     #new
     SendAvoiderBootFromSafeZone = 3
+
+    Actions = [Forward, Right, Left]

@@ -24,15 +24,17 @@ class RobotController(ABC):
         self.robot = robot
         self.last_action = -9999
         self.total_steps = 0
+        self.total_reward = 0
+        self.speeds = [0,0]
 
-        #Learning (Actions, states, zones
+        #Learning (Actions, states, zones)
         self.Q = np.zeros((3,10,5))
         self.illegal_zone_actions = [
             (Actions.Forward, Zones.EdgeFront),
             (Actions.Forward, Zones.EdgeLeft),
             (Actions.Forward, Zones.EdgeRight),
-            (Actions.Left, Zones.EdgeLeft),
-            (Actions.Right, Zones.EdgeRight),
+            #(Actions.Left, Zones.EdgeLeft),
+            #(Actions.Right, Zones.EdgeRight),
         ]
         self.illegal_state_actions = [
             # when a robot is in the way, seen with robot_in_way, then forward illegal
@@ -56,11 +58,14 @@ class RobotController(ABC):
             self.action = None
 
         is_robot_in_way = self.robot.robot_in_way()
-        if is_robot_in_way[0]: 
+        # if we are stuck in this robot in the way state for a long time,
+        # for example 1000 count, then we should just allow forward to push people out of the way
+        if is_robot_in_way[0] and count - self.last_action < 1000: 
             avoid_action = Actions.Left if is_robot_in_way[1] < 0 else Actions.Right
-            speeds = self.speed_from_action(avoid_action)
+            self.speeds = self.speed_from_action(avoid_action)
         else:
-            if (new_state != self.state or new_zone != self.zone or self.action is None):
+            if (new_state != self.state or new_zone != self.zone or self.action is None) and (count - self.last_action > 30 or self.action not in [Actions.Left, Actions.Right]):
+
                 if self.action != None:
                     self.update_table(self.action, self.state, new_state, self.zone, new_zone)
 
@@ -74,10 +79,12 @@ class RobotController(ABC):
                     # exploit
                     self.action = self.best_action(new_state, new_zone)
                 self.last_action = count
+                self.state = new_state
+                self.zone = new_zone
                 
-            speeds = self.speed_from_action(self.action)        
+            self.speeds = self.speed_from_action(self.action)        
         
-        self.robot.drive(*speeds)        
+        self.robot.drive(*self.speeds)        
         
 
     def max_future(self, state, zone):

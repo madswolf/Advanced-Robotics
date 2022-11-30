@@ -70,7 +70,7 @@ def animate(i):
         y = [ys, p[i, 3] + ys]
         
         if "Verstappen" in files[idx]:
-            front_fov = radians(30)
+            front_fov = radians(40)
             view_distance = 0.4
             a = (y[1]-y[0]) / (x[1]-x[0])
             angle = atan(a)
@@ -83,7 +83,7 @@ def animate(i):
             ax.add_patch(triangle)
 
             angle2 = angle+radians(180)
-            back_fov = radians(15)
+            back_fov = radians(20)
             x1b = x[0] + cos(angle2 + back_fov) * view_distance
             x2b = x[0] + cos(angle2 - back_fov) * view_distance
             y1b = y[0] + sin(angle2 + back_fov) * view_distance

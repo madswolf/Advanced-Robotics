@@ -25,3 +25,7 @@ count = 10000
 for i in range(count):
     for c in controllers:
         c.step(i)
+
+for c in controllers:
+    if type(c) == Controllers.AvoiderController:
+        print(c.robot.name, c.Q)

@@ -2,46 +2,41 @@ import os
 os.system("(asebamedulla ser:name=Thymio-II &) && sleep 0.3")
 import dbus
 import dbus.mainloop.glib
-from Models import Colors, Zones
+from Models import Colors, Zones, States
 import Vision.LED_capture as capture
 
 from .ControllableRobot import ControllableRobot
 
-class Thymio(ControllableRobot):
+class Thymio(ControllableRobot): 
+    color_state_pairs = {
+        Colors.Red: States.SeekerFront,
+        Colors.Orange: States.SeekerFront,
+        Colors.Blue: States.AvoiderFront,
+        Colors.Green: States.AvoiderInSafeZoneFront,
+        Colors.Purple: States.NoObs
+    }
+
     def __init__(self):
         super().__init__()
         self.aseba = self.setup()
+        self.color = Colors.Blue
 
     def drive(self, left_wheel_speed, right_wheel_speed):
-        print("Left_wheel_speed: " + str(left_wheel_speed))
-        print("Right_wheel_speed: " + str(right_wheel_speed))
-
+        #print("Left_wheel_speed: " + str(left_wheel_speed))
+        #print("Right_wheel_speed: " + str(right_wheel_speed))
         left_wheel = left_wheel_speed
         right_wheel = right_wheel_speed
 
         self.aseba.SendEventName("motor.target", [left_wheel, right_wheel])
 
     def stop(self):
-        left_wheel = 0
-        right_wheel = 0
-        self.aseba.SendEventName("motor.target", [left_wheel, right_wheel])
+        self.drive(0, 0)
 
     def robot_in_way(self): # (horizontal[5], ground[2])
         values = list(self.aseba.GetVariable("thymio-II", "prox.horizontal"))[:5]
-        def index_to_angle(index):
-            if(index == 0):
-                return -40
-            elif(index == 1):
-                return -20
-            elif(index == 2):
-                return 0
-            elif(index == 3):
-                return 20
-            else:
-                return 40
-
-        highest = max([(x, index_to_angle(i)) for x,i in enumerate(values)], key=lambda item: item[0])
-        if(highest[0] < 100):
+        angles = [-40, -20, 0, 20, 40]
+        highest = max([(x, angles[i]) for x,i in enumerate(values)], key=lambda item: item[0])
+        if(highest[0] < 200):
             return (True, highest[1])
         else:
             return (False, None)
@@ -56,14 +51,14 @@ class Thymio(ControllableRobot):
         reflected_right_high = reflected[1] > 400
 
 
-        if(ambient_high):
+        if ambient_high:
             return Zones.Normal
-        elif(reflected_left_high or reflected_right_high):
+        elif reflected_left_high or reflected_right_high:
             return Zones.Safe
         else:
-            if(not reflected_left_high):
+            if not reflected_left_high:
                 return Zones.EdgeLeft
-            elif(not reflected_right_high):
+            elif not reflected_right_high:
                 return Zones.EdgeRight
             else:
                 return Zones.EdgeFront
@@ -73,10 +68,12 @@ class Thymio(ControllableRobot):
     def transmit(self, message):
         self.aseba.SendEventName("prox.comm.tx", [message])
 
+
     def receive(self):
         rx = self.aseba.GetVariable("thymio-II", "prox.comm.rx")
         if rx[0] != 0:
-            return print(rx[0])
+            return rx[0]
+        return None
 
     def set_color(self, color):
         self.color = color
@@ -93,7 +90,27 @@ class Thymio(ControllableRobot):
 
     # TODO Computer vision. Also with other colors than red
     def get_state(self):
-        keypoints = capture.get_keypoints()
+        # only check for opps 
+        if self.color == Colors.Red or self.color == Colors.Orange:
+            return self.check_for_color(Colors.Blue)
+        elif self.color == Colors.Blue or self.color == Colors.Green:
+            state = self.check_for_color(Colors.Red)
+            if state == States.NoObs: # lets check for orange if there is no red, just in case
+                return self.check_for_color(Colors.Orange)
+            else:
+                return state
+        return States.NoObs
+
+    def check_for_color(self, color):
+        keypoints = sorted(capture.get_keypoints(color), key=lambda point: point.size)
+        if len(keypoints) > 0:
+            if keypoints[0].pt[0] < (640 / 3):
+                return self.color_state_pairs[color] + 1
+            elif keypoints[0].pt[0] > (640 / 3) * 2:
+                return self.color_state_pairs[color] + 2
+            else:
+                return self.color_state_pairs[color]
+        return States.NoObs
 
     ############## Bus and aseba setup ######################################
 

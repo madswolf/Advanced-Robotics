@@ -27,6 +27,8 @@ class Simio(ControllableRobot):
     simulation_timestep = 0.01  # timestep in kinematics sim (probably don't touch..)
     receive_range = 0.4
     camera_range = 0.5
+    front_angle = 80
+    back_angle = 40
 
     def __init__(self):
         super().__init__()
@@ -41,6 +43,7 @@ class Simio(ControllableRobot):
         self.right_wheel_velocity = 0.0
         self.color = Colors.Blue
         self.current_message = "0"
+        self.tagged = False
         
         Simios.append(self)
         
@@ -84,7 +87,7 @@ class Simio(ControllableRobot):
         projection = LineString([(self.x, self.y), (self.x+cos(self.q)*2*Simio.W,(self.y+sin(self.q)*2*Simio.H)) ])  # a line from robot to a point outside arena in direction of q
         intersection = projection.intersection(Polygon(Simio.world_edge).exterior)
         distance_to_intersection = intersection.distance(Point(self.x, self.y))
-        if distance_to_intersection < Simio.L:
+        if distance_to_intersection < Simio.L * 1.1:
             intersectionX, intersectionY = intersection.xy
 
             angle_of_intersection = np.arctan2(intersectionY[0]-self.y, intersectionX[0]-self.x)
@@ -206,7 +209,7 @@ class Simio(ControllableRobot):
         self.current_message = message
 
     def receive(self):
-        front_fov = radians(30)
+        front_fov = radians(Simio.front_angle / 2)
         
         angle = self.q
         x1 = self.x + cos(angle + front_fov) * Simio.receive_range
@@ -216,7 +219,7 @@ class Simio(ControllableRobot):
         front_triangle = Polygon(LinearRing([(self.x, self.y), (x1, y1), (x2, y2)]))
 
         angle2 = angle+radians(180)
-        back_fov = radians(15)
+        back_fov = radians(Simio.back_angle / 2)
         x1b = self.x + cos(angle2 + back_fov) * Simio.receive_range
         x2b = self.x + cos(angle2 - back_fov) * Simio.receive_range
         y1b = self.y + sin(angle2 + back_fov) * Simio.receive_range
@@ -227,8 +230,8 @@ class Simio(ControllableRobot):
             if simio == self:
                 continue
             if front_triangle.intersects(simio.robot_circle) or back_triangle.intersects(simio.robot_circle):
-                if -radians(30) < simio.q - self.q < radians(30) or \
-                   -radians(15) < abs(simio.q - self.q) % pi < radians(15):
+                if -radians(Simio.front_angle / 2) < simio.q - self.q < radians(Simio.front_angle / 2) or \
+                   -radians(Simio.back_angle / 2) < abs(simio.q - self.q) % pi < radians(Simio.back_angle / 2):
                     if simio.current_message == "1":
                         return simio.current_message
         return None

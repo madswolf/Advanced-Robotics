@@ -1,6 +1,6 @@
 from .RobotController import RobotController
 from .Robots.Simio import Simios
-from Models import Colors, Zones
+from Models import Colors, Zones, Actions, States
 
 class SeekerController(RobotController):
     def __init__(self, robot):
@@ -10,7 +10,9 @@ class SeekerController(RobotController):
 
     def get_reward(self, action, state, zone):
         tag_count = self.get_tag_count()
-        return tag_count / self.total_steps + ((tag_count == 4) * 1000)
+        bonus = action == Actions.Forward
+        bonus += state in [States.AvoiderFront, States.AvoiderLeft, States.AvoiderRight]
+        return tag_count / (max(self.total_steps-bonus,0)) + ((tag_count == 4) * 1000)
     
     def get_tag_count(self):
         return len(list(filter(lambda x: x.tagged, Simios)))
