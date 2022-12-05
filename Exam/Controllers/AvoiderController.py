@@ -3,8 +3,8 @@ from Models import Colors, Zones, Actions, States
 from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions
 
 class AvoiderController(RobotController):
-    def __init__(self, robot):
-        super().__init__(robot)
+    def __init__(self, robot, Qtable):
+        super().__init__(robot, Qtable)
         self.robot.set_color(Colors.Blue)
         self.illegal_zone_actions = IllegalZoneActions.Avoider # TODO remove after safe zone logik)
         self.illegal_actions = IllegalActions.Avoider

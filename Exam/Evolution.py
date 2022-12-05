@@ -8,9 +8,9 @@ from Controllers.Robots import Simio
 
 evolution_data_folder = "Exam/EvolutionData"
 
-def build_table_random(controller: RobotController):
+def build_table_random(is_seeker):
     Q = np.random.random_sample((3, 10, 5))
-    return disallow_illegal_actions(controller, Q)
+    return disallow_illegal_actions(Q, is_seeker)
 
 def crossover_tables(t1: np.ndarray, t2: np.ndarray):
     Q = t2.copy()
@@ -22,29 +22,29 @@ def crossover_tables(t1: np.ndarray, t2: np.ndarray):
                     Q[idx1][idx2][idx3] = z
     return Q
 
-def mutate_table(t: np.ndarray, isSeeker:bool):
+def mutate_table(t: np.ndarray, is_seeker:bool):
     Q = t.copy()
     for idx1, x in enumerate(t):
         for idx2, y in enumerate(x):
             for idx3, z in enumerate(y):
                 if random() > 0.1:
                     Q[idx1][idx2][idx3] = random()
-    return disallow_illegal_actions(Q, isSeeker)
+    return disallow_illegal_actions(Q, is_seeker)
 
-def breed(t1: np.ndarray, t2: np.ndarray, isSeeker: bool):
+def breed(t1: np.ndarray, t2: np.ndarray, is_seeker: bool):
     baby = crossover_tables(t1, t2)
-    return mutate_table(baby, isSeeker)
+    return mutate_table(baby, is_seeker)
 
-def disallow_illegal_actions(t: np.ndarray, isSeeker: bool):
+def disallow_illegal_actions(t: np.ndarray, is_seeker: bool):
     illegalZoneActions = \
-        IllegalZoneActions.Seeker if isSeeker \
+        IllegalZoneActions.Seeker if is_seeker \
         else IllegalZoneActions.Avoider 
 
     for act in illegalZoneActions:
         t[act[0], :, act[1]] = -10
 
     illegalStateActions = \
-        IllegalStateActions.Seeker if isSeeker \
+        IllegalStateActions.Seeker if is_seeker \
         else IllegalStateActions.Avoider 
         
     for act in illegalStateActions:
@@ -52,7 +52,7 @@ def disallow_illegal_actions(t: np.ndarray, isSeeker: bool):
 
     
     illegalStateActions = \
-        IllegalActions.Seeker if isSeeker \
+        IllegalActions.Seeker if is_seeker \
         else IllegalActions.Avoider 
         
     for act in illegalStateActions: #don't weight illegal actions positively
@@ -124,7 +124,7 @@ def export_gen_groups(participants, number):
         np.save(f"{evolution_data_folder}/gen{number}_input_group{i}.npy", participants[1][i*4+1])
         np.save(f"{evolution_data_folder}/gen{number}_input_group{i}.npy", participants[1][i*4+2])
         np.save(f"{evolution_data_folder}/gen{number}_input_group{i}.npy", participants[1][i*4+3])
-    
+
 
 def import_gen_group(number, group):
     with open(f"{evolution_data_folder}/gen{number}_input_group{group}.npy", "rb") as f:
