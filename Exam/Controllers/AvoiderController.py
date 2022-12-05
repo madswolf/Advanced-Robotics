@@ -1,12 +1,14 @@
 from .RobotController import RobotController
 from Models import Colors, Zones, Actions, States
+from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions
 
 class AvoiderController(RobotController):
     def __init__(self, robot):
         super().__init__(robot)
         self.robot.set_color(Colors.Blue)
-        self.illegal_zone_actions.append((Actions.Forward, Zones.Safe)) # TODO remove after safe zone logik)
-        self.illegal_zone_actions.append((Actions.Right, Zones.Safe)) # TODO remove after safe zone logik)
+        self.illegal_zone_actions = IllegalZoneActions.Avoider # TODO remove after safe zone logik)
+        self.illegal_actions = IllegalActions.Avoider
+        self.illegal_state_actions = IllegalStateActions.Avoider
         self.time_alive = 0
 
     def get_reward(self, action, state, zone):

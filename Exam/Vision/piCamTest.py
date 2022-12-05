@@ -13,7 +13,6 @@ from Models import Colors
 
 width = 640
 height = 480
-roi_params = "1,0.4,1,1"
 camera = PiCamera()
 camera.resolution = (width, height)
 camera.exposure_mode = 'spotlight'
@@ -24,7 +23,7 @@ def get_keypoints(color):
   
   frame = rawCapture.array
   frame = cv2.rotate(frame, cv2.ROTATE_180)
-  frame = frame[190:,:] #crop to 640x290 and taking the bottom part
+  frame = frame[170:,:] #crop to 640x290 and taking the bottom part
   keypoints = process(frame, color)
 
   rawCapture.truncate(0) # flush camera buffer
@@ -35,9 +34,9 @@ def main():
   
   frame = rawCapture.array
   frame = cv2.rotate(frame, cv2.ROTATE_180)
-  frame = frame[190:,:] #crop to 640x290 and taking the bottom part
+  frame = frame[170:,:] #crop to 640x290 and taking the bottom part
 
-  keypoints = process(frame, "red")
+  keypoints = process(frame, Colors.RedOrange)
   for keypoint in keypoints:
     #cv2.circle(mask, (int(keypoint.pt[0]),int(keypoint.pt[1])), int(keypoint.size/2), (255,255,255), -1)
     cv2.circle(frame, (int(keypoint.pt[0]),int(keypoint.pt[1])), int(keypoint.size/2), (255,255,255), -1)
@@ -50,25 +49,32 @@ def main():
 def process(frame, color):
   hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
   
-  if color == Colors.Red: # this is also covering orange
-    lower = (0, 75, 170)
-    upper = (20, 255, 255)
+  if color == Colors.RedOrange:
+    first_lower = (0, 25, 50)
+    first_upper = (30, 255, 255)
+    second_lower = (170, 25, 50)
+    second_upper = (180, 255, 255)
   elif color == Colors.Green:
-    lower = (45, 50, 200)
+    lower = (45, 30, 50)
     upper = (90, 255, 255)
   elif color == Colors.Blue:
-    lower = (90, 50, 200)
-    upper = (115, 255, 255)
+    lower = (90, 50, 100)
+    upper = (125, 255, 255)
   elif color == Colors.Purple: # we dont rly need this because we dont care 
     lower = (135, 50, 200)
     upper = (150, 255, 255)
   else: # old red
     lower = (170,25,0)
     upper = (205,255,255)
-  
-  color_filter = cv2.inRange(hsv, lower, upper)
   #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
   
+  if color == "redorange":
+    mask1 = cv2.inRange(hsv, first_lower, first_upper)
+    mask2 = cv2.inRange(hsv, second_lower, second_upper)
+    color_filter = cv2.bitwise_or(mask1, mask2)
+  else:
+    color_filter = cv2.inRange(hsv, lower, upper)
+  #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
   thresh = cv2.threshold(color_filter, 60, 255, cv2.THRESH_BINARY)[1]
 
   params = cv2.SimpleBlobDetector_Params()
@@ -90,4 +96,4 @@ def process(frame, color):
   return keypoints
 
 if __name__ == "__main__":
-  get_keypoints(Colors.Red)
+  main()

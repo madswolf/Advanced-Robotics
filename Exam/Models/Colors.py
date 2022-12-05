@@ -4,3 +4,4 @@ class Colors():
     Green = 'green'
     Orange = 'orange'
     Purple = 'purple'
+    RedOrange = 'redorange'

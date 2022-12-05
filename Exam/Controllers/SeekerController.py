@@ -1,10 +1,14 @@
 from .RobotController import RobotController
 from .Robots.Simio import Simios
 from Models import Colors, Zones, Actions, States
+from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions
 
 class SeekerController(RobotController):
     def __init__(self, robot):
         super().__init__(robot)
+        self.illegal_actions = IllegalActions.Seeker
+        self.illegal_state_actions = IllegalStateActions.Seeker
+        self.illegal_zone_actions = IllegalZoneActions.Seeker
         self.robot.set_color(Colors.Red)
         self.robot.transmit("1")
 

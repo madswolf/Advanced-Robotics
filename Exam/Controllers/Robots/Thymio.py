@@ -94,15 +94,11 @@ class Thymio(ControllableRobot):
         if self.color == Colors.Red or self.color == Colors.Orange:
             return self.check_for_color(Colors.Blue)
         elif self.color == Colors.Blue or self.color == Colors.Green:
-            state = self.check_for_color(Colors.Red)
-            if state == States.NoObs: # lets check for orange if there is no red, just in case
-                return self.check_for_color(Colors.Orange)
-            else:
-                return state
+            return self.check_for_color(Colors.RedOrange)
         return States.NoObs
 
     def check_for_color(self, color):
-        keypoints = sorted(capture.get_keypoints(color), key=lambda point: point.size)
+        keypoints = capture.get_keypoints(color)
         if len(keypoints) > 0:
             if keypoints[0].pt[0] < (640 / 3):
                 return self.color_state_pairs[color] + 1

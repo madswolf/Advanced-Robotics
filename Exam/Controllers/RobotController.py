@@ -9,10 +9,11 @@ from .Robots.ControllableRobot import ControllableRobot
 from Models.States import States
 from Models.Actions import Actions
 from Models.Zones import Zones
+from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions
 
 
 class RobotController(ABC):
-    def __init__(self, robot: ControllableRobot):
+    def __init__(self, robot: ControllableRobot, Qtable: np.ndarray):
         # Variables 
         ###########
 
@@ -28,19 +29,10 @@ class RobotController(ABC):
         self.state_statistics = [0 for _ in range(10)]
 
         #Learning (Actions, states, zones)
-        self.Q = np.zeros((3,10,5))
-        self.illegal_zone_actions = [
-            (Actions.Forward, Zones.EdgeFront),
-            (Actions.Forward, Zones.EdgeLeft),
-            (Actions.Forward, Zones.EdgeRight),
-            (Actions.Left, Zones.EdgeFront),
-            (Actions.Left, Zones.EdgeLeft),
-            (Actions.Left, Zones.EdgeRight)
-        ]
-        self.illegal_state_actions = [
-            # when a robot is in the way, seen with robot_in_way, then forward illegal
-        ]
-        self.illegal_actions = []
+        self.Q = Qtable
+        self.illegal_zone_actions = IllegalZoneActions.General
+        self.illegal_state_actions = IllegalStateActions.General
+        self.illegal_actions = IllegalActions.General
 
 
     #Abstract Methods
@@ -71,8 +63,8 @@ class RobotController(ABC):
         else:
             if (new_state != self.state or new_zone != self.zone or self.action is None) and (count - self.last_action > 30 or self.action not in [Actions.Left, Actions.Right]):
                 self.state_statistics[new_state] += 1
-                if self.action != None:
-                    self.update_table(self.action, self.state, new_state, self.zone, new_zone)
+                #if self.action != None:
+                #    self.update_table(self.action, self.state, new_state, self.zone, new_zone)
 
                 if random() <= 0.2:
                 # explore
