@@ -59,7 +59,7 @@ def disallow_illegal_actions(t: np.ndarray, is_seeker: bool):
 
     return t
 
-def export_run(arrs: list[np.ndarray], fitness: list[float], name: str):
+def export_run(arrs, fitness, name):
     for (arr,rew) in zip(arrs, fitness):
         np.save(f"{evolution_data_folder}/{name}.npy", arr)
         np.save(f"{evolution_data_folder}/{name}.npy", np.asarray([rew]))
@@ -80,14 +80,14 @@ def import_generation(number):
     return [(x[0], *x[1]) for x in runs] # (seekers, avoiders)
     
 
-def elitism(participants: list[tuple[np.ndarray, float]]):
+def elitism(participants):
     ranked = sorted(participants, key=lambda x: x[1])
     if len(ranked) % 2 != 0:
         raise "Generation has odd number of subjects. Cannot generate next generation"
     return ranked[len(ranked)/2:]
 
 
-def pair_participants(participants: list[np.ndarray]):
+def pair_participants(participants):
     output = []
     for _ in range(4):
         pairing_sequence = shuffle(range(len(participants)))
