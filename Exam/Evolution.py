@@ -70,7 +70,7 @@ def import_run(name):
     with open(f"{evolution_data_folder}{name}.npy", "rb") as f:
         seeker = np.load(f)
         seeker_fitness = np.load(f)[0]
-        avoiders = [(np.load(f), np.load(f) for _ in range(8))]
+        avoiders = [(np.load(f), np.load(f)) for _ in range(8)]
         return ((seeker, seeker_fitness), avoiders)
 
 

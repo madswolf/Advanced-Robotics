@@ -1,5 +1,7 @@
 from .RobotController import RobotController
-from .Robots.Simio import Simios
+import sys
+if "--simulated" in sys.argv:
+    from .Robots.Simio import Simios
 from Models import Colors, Zones, Actions, States
 from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions
 
@@ -13,10 +15,7 @@ class SeekerController(RobotController):
         self.robot.transmit("1")
 
     def get_reward(self, action, state, zone):
-        tag_count = self.get_tag_count()
-        bonus = action == Actions.Forward
-        bonus += state in [States.AvoiderFront, States.AvoiderLeft, States.AvoiderRight]
-        return tag_count / (max(self.total_steps-bonus,0)) + ((tag_count == 4) * 1000)
+        return 0
 
     def total_reward(self):
         tag_count = self.get_tag_count()
