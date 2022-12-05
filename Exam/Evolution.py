@@ -4,7 +4,6 @@ import os
 from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions 
 
 from Controllers import RobotController, AvoiderController, SeekerController
-from Controllers.Robots import Simio
 
 evolution_data_folder = "Exam/EvolutionData"
 
