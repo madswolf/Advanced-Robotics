@@ -29,3 +29,4 @@ for i in range(count):
 for c in controllers:
     if type(c) == Controllers.AvoiderController:
         print(c.robot.name, c.Q)
+    print(c.state_statistics)

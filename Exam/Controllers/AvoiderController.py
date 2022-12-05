@@ -7,6 +7,7 @@ class AvoiderController(RobotController):
         self.robot.set_color(Colors.Blue)
         self.illegal_zone_actions.append((Actions.Forward, Zones.Safe)) # TODO remove after safe zone logik)
         self.illegal_zone_actions.append((Actions.Right, Zones.Safe)) # TODO remove after safe zone logik)
+        self.time_alive = 0
 
     def get_reward(self, action, state, zone):
         if action == Actions.Forward:
@@ -18,8 +19,12 @@ class AvoiderController(RobotController):
         else:
             return 1
 
+    def total_reward(self):
+        return self.time_alive
+
     def step(self, count):
         if not self.robot.tagged:
+            self.time_alive = count
             super().step(count)
             if self.robot.get_zone() == Zones.Safe:
                 self.robot.set_color(Colors.Green)

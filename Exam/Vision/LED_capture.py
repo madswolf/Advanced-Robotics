@@ -13,18 +13,21 @@ from Models import Colors
 
 width = 640
 height = 480
+roi_params = "1,0.4,1,1"
 
 def get_keypoints(color):
   tmpname = tempfile.mkstemp(suffix='.png')[1]
   # capture image with raspistill built in
-  raspistill = ['/opt/vc/bin/raspistill','-w', str(width),'-h', str(height),'-t','1','-ss', '4000','-ex', 'spotlight', '-vf', '-hf', '-o',tmpname]
+  raspistill = ['/opt/vc/bin/raspistill','-w', str(width),'-h', str(height),'-t','1', '-roi', roi_params, '-ss', '4000','-ex', 'spotlight', '-vf', '-hf', '-o',tmpname]
   try:
     subprocess.check_call(raspistill)
   except Exception as e:
     print("error taking photo")
     return [None]
 
-  frame = cv2.imread(tmpname)[190:,:] #crop to 640x290 and taking the bottom part
+  frame = cv2.imread(tmpname)
+  #frame = cv2.imread(tmpname)[190:,:] #crop to 640x290 and taking the bottom part
+  # instead of this, we can explore the roi parameter from raspistill and see if it works better
   keypoints = process(frame, color)
   os.remove(tmpname)
 
@@ -92,30 +95,23 @@ def process(frame, color):
   """
   hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
   
-  if color == Colors.Green:
-    lower = (20, 25, 50)
-    upper = (70, 255, 255)
-  elif color == Colors.Orange:
-    lower = (10, 25, 50)
-    upper = (40, 255, 255)
-  elif color == Colors.Red:
-    first_lower = (0, 25, 50)
-    first_upper = (10, 255, 255)
-    second_lower = (170, 25, 50)
-    second_upper = (180, 255, 255)
+  if color == Colors.Red: # this is also covering orange
+    lower = (0, 75, 170)
+    upper = (20, 255, 255)
+  elif color == Colors.Green:
+    lower = (45, 50, 200)
+    upper = (90, 255, 255)
   elif color == Colors.Blue:
-    lower = (110, 25, 50)
-    upper = (130, 255, 255)
+    lower = (90, 50, 200)
+    upper = (115, 255, 255)
+  elif color == Colors.Purple: # we dont rly need this because we dont care 
+    lower = (135, 50, 200)
+    upper = (150, 255, 255)
   else: # old red
     lower = (170,25,0)
     upper = (205,255,255)
-
-  if color == Colors.Red:
-    mask1 = cv2.inRange(hsv, first_lower, first_upper)
-    mask2 = cv2.inRange(hsv, second_lower, second_upper)
-    color_filter = cv2.bitwise_or(mask1, mask2)
-  else:
-    color_filter = cv2.inRange(hsv, lower, upper)
+  
+  color_filter = cv2.inRange(hsv, lower, upper)
   #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
   
   thresh = cv2.threshold(color_filter, 60, 255, cv2.THRESH_BINARY)[1]

@@ -13,6 +13,10 @@ class SeekerController(RobotController):
         bonus = action == Actions.Forward
         bonus += state in [States.AvoiderFront, States.AvoiderLeft, States.AvoiderRight]
         return tag_count / (max(self.total_steps-bonus,0)) + ((tag_count == 4) * 1000)
+
+    def total_reward(self):
+        tag_count = self.get_tag_count()
+        return tag_count / (max(self.total_steps,0)) + ((tag_count == 4) * 1000)
     
     def get_tag_count(self):
         return len(list(filter(lambda x: x.tagged, Simios)))
