@@ -131,16 +131,3 @@ def import_gen_group(number, group):
         seeker = np.load(f)
         avoiders = [np.load(f) for _ in range(4)]
         return seeker, avoiders
-
-
-if __name__ == "__main__":
-    c = AvoiderController(Simio())
-    Q1 = build_table_random(c)
-    Q2 = build_table_random(c)
-    combined = crossover_tables(Q1, Q2)
-    mutated = mutate_table(c, combined)
-    
-    print(Q1)
-    print(Q2)
-    print(combined)
-    print(mutated)
