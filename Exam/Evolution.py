@@ -63,6 +63,11 @@ def export_run(arrs, fitness, name):
     for (arr,rew) in zip(arrs, fitness):
         np.save(f"{evolution_data_folder}/{name}.npy", arr)
         np.save(f"{evolution_data_folder}/{name}.npy", np.asarray([rew]))
+        
+        file = open(f"{evolution_data_folder}/{name}_finished.txt", "w")
+        file.write(f"{name} + \n")
+        file.flush()
+        file.close()
 
 
 def import_run(name):
@@ -75,7 +80,7 @@ def import_run(name):
 
 def import_generation(number):
     files = os.listdir(evolution_data_folder)
-    this_gen = [s for s in files if s.endswith(f"gen{number}.npy")]
+    this_gen = [s for s in files if f"gen{number}_group" in s]
     runs = [import_run(s) for s in this_gen]
     return [(x[0], *x[1]) for x in runs] # (seekers, avoiders)
     

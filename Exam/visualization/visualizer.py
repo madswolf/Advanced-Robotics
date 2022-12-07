@@ -57,8 +57,8 @@ ax.set_ylim(minY, maxY)
 def animate(i):
     global files
     ax.clear()
-    ax.add_patch(plt.Polygon([(-1, -1), (-1, 1), (1, 1), (1, -1)], color="r", linestyle="--", fill= False))
-    ax.add_patch(plt.Polygon([[-0.2, -0.2], [-0.2, 0.2], [0.2, 0.2], [0.2, -0.2]], color="gray", alpha=0.5, fill = True))
+    ax.add_patch(plt.Polygon([(-1, -0.6), (-1, 0.6), (1, 0.6), (1, -0.6)], color="r", linestyle="--", fill= False))
+    ax.add_patch(plt.Polygon([[-0.09, -0.075], [-0.09, 0.075], [0.09, 0.075], [0.09, -0.075]], color="gray", alpha=0.5, fill = True))
     
 
     # Get the point from the points list at index i

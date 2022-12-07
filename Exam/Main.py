@@ -1,7 +1,7 @@
 import sys
 import Controllers as Controllers
 import Controllers.Robots as Robots
-from Evolution import build_table_random, import_gen_group
+from Evolution import build_table_random, import_gen_group, export_run
 
 
 Qtables = []
@@ -46,6 +46,12 @@ for i in range(count):
         c.step(i)
 
 for c in controllers:
-    if type(c) == Controllers.AvoiderController:
-        print(c.robot.name, c.Q)
-    print(c.total_reward())
+    gen_number = int(sys.argv[sys.argv.index("--import-generation")+1])+1
+    group_number = sys.argv[sys.argv.index("--import-generation")+2]
+    if "--import-generation" in sys.argv:
+        arrs, fitness = [(c.Q, c.total_reward) for c in reversed(controllers)]
+        export_run(arrs, fitness, name=f"gen{str(gen_number)}_group{group_number}")
+    else:
+        if type(c) == Controllers.AvoiderController:
+            print(c.robot.name, c.Q)
+        print(c.total_reward())
