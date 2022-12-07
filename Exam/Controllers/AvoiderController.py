@@ -36,7 +36,9 @@ class AvoiderController(RobotController):
                 self.robot.set_color(Colors.Blue)
                 #self.robot.transmit("0")
             receive_message = self.robot.receive()
-            if receive_message == "1": # right now we can be tagged in the same zone. maybe consider that.
+            if receive_message == "1" and our_zone != Zones.Safe:
+                # At the moment, we dont clear this buffer or and we also dont in the safe zone until we get a two, which means that
+                # we will get tagged the moment we leave the safe zone, if we dont get a random different message before that.
                 print("oiv bruv i got fokken tagged lad ffs right fooken bummer that 1 mate, hilsen " + self.robot.name)
                 self.robot.tagged = True
         else:

@@ -47,11 +47,13 @@ class Thymio(ControllableRobot):
         reflected = list(self.aseba.GetVariable("thymio-II", "prox.ground.reflected"))
         ambient = list(self.aseba.GetVariable("thymio-II", "prox.ground.ambiant"))
         
-        #faulty 
+        #faulty first reading so we force it high
         if reflected == [0,0]:
             reflected = [1000, 1000]
             print("setting reflected to 1000 1000", reflected)
         
+        # when the sun is down, the ambient is always low. Maybe we want a night mode and a day mode where night only uses reflected?
+
         ambient_left_high = ambient[0] > 0
         ambient_right_high = ambient[1] > 0
         reflected_left_high = reflected[0] > 400
