@@ -12,14 +12,14 @@ from .ControllableRobot import ControllableRobot
 
 Simios = []
 
-start_positions = [(-0.8, -0.8), (-0.8, 0.8), (0.8, 0.8), (0.8, -0.8), (0.0, 0.0)] # seeker is always last
+start_positions = [(-0.8, -0.4), (-0.8, 0.4), (0.8, 0.4), (0.8, -0.4), (0.0, 0.4)] # seeker is always last
 names = ["Hamilton", "Stroll", "Lando", "Alonso", "Verstappen"]
 
 class Simio(ControllableRobot):
     # Simulation constants
     ###########
     W = 2.0  # width of arena
-    H = 2.0  # height of arena
+    H = 1.2  # height of arena
     R = 0.0225  # radius of wheels in meters
     L = 0.095   # distance between wheels in meters
     distance_threshold = 0.15  # distance threshold for collision avoidance
@@ -67,7 +67,7 @@ class Simio(ControllableRobot):
     # the world is a rectangular arena with width W and height H
     world = LinearRing([(W/2,H/2),(-W/2,H/2),(-W/2,-H/2),(W/2,-H/2)])
     world_edge = LinearRing([(W/2.2,H/2.2),(-W/2.2,H/2.2),(-W/2.2,-H/2.2),(W/2.2,-H/2.2)])
-    safeZone = LinearRing([(W/10,H/10),(-W/10,H/10),(-W/10,-H/10),(W/10,-H/10)])
+    safeZone = LinearRing([[-0.09, -0.075], [-0.09, 0.075], [0.09, 0.075], [0.09, -0.075]])
 
     world_all = [world, safeZone, world_edge]
 
