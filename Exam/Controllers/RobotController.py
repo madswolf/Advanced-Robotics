@@ -53,7 +53,6 @@ class RobotController(ABC):
         new_zone = self.robot.get_zone()
         new_state = self.robot.get_state()
         
-        print(new_zone, new_state)
         if count - self.last_action > 100:
             self.action = None
 
