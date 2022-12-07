@@ -12,7 +12,8 @@ from .ControllableRobot import ControllableRobot
 
 Simios = []
 
-start_positions = [(-0.8, -0.4), (-0.8, 0.4), (0.8, 0.4), (0.8, -0.4), (0.0, 0.4)] # seeker is always last
+start_positions = [(-0.9, -0.4), (-0.8, 0.4), (-0.8, 0.4), (-0.8, 0.4), (-0.8, 0.4)] # seeker is always last
+#start_positions = [(-0.8, -0.4), (-0.8, 0.4), (0.8, 0.4), (0.8, -0.4), (0.0, 0.4)] # seeker is always last
 names = ["Hamilton", "Stroll", "Lando", "Alonso", "Verstappen"]
 
 class Simio(ControllableRobot):
@@ -37,7 +38,7 @@ class Simio(ControllableRobot):
         self.name = names[len(Simios)]
         self.x = start_positions[len(Simios)][0]   # robot position in meters - x direction - positive to the right 
         self.y = start_positions[len(Simios)][1]   # robot position in meters - y direction - positive up
-        self.q = random.random() * pi  # robot heading with respect to x-axis in radians 
+        self.q = 0 #random.random() * pi  # robot heading with respect to x-axis in radians 
         self.robot_circle = Point(self.x, self.y).buffer(Simio.L)
         self.left_wheel_velocity = 0.0
         self.right_wheel_velocity = 0.0
@@ -51,17 +52,17 @@ class Simio(ControllableRobot):
         self.file = open(os.getcwd()+"/Exam/visualization/trajectories/trajectory_" +  str(current_time) + "_" + self.name + ".dat", "w")
         
     def simulationstep(self):
-        for step in range(int(Simio.robot_timestep/Simio.simulation_timestep)):     #step model time/timestep times
-            v_x = cos(self.q)*(Simio.R*self.left_wheel_velocity/2 + Simio.R*self.right_wheel_velocity/2) 
-            v_y = sin(self.q)*(Simio.R*self.left_wheel_velocity/2 + Simio.R*self.right_wheel_velocity/2)
-            omega = (Simio.R*self.right_wheel_velocity - Simio.R*self.left_wheel_velocity)/(2*Simio.L)    
-        
-            self.x += v_x * Simio.simulation_timestep
-            self.y += v_y * Simio.simulation_timestep
-            self.q += omega * Simio.simulation_timestep
-            self.robot_circle = Point(self.x, self.y).buffer(Simio.L)
-            if step % 5 == 0:
-                self.file.write( str(self.x) + ", " + str(self.y) + ", " + str(cos(self.q)*0.05) + ", " + str(sin(self.q)*0.05) + "\n")
+        #for step in range(int(Simio.robot_timestep/Simio.simulation_timestep)):     #step model time/timestep times
+        v_x = cos(self.q)*(Simio.R*self.left_wheel_velocity/2 + Simio.R*self.right_wheel_velocity/2) 
+        v_y = sin(self.q)*(Simio.R*self.left_wheel_velocity/2 + Simio.R*self.right_wheel_velocity/2)
+        omega = (Simio.R*self.right_wheel_velocity - Simio.R*self.left_wheel_velocity)/(2*Simio.L)    
+    
+        self.x += v_x #* Simio.simulation_timestep
+        self.y += v_y #* Simio.simulation_timestep
+        self.q += omega #* Simio.simulation_timestep
+        self.robot_circle = Point(self.x, self.y).buffer(Simio.L)
+        #if step % 5 == 0:
+        self.file.write( str(self.x) + ", " + str(self.y) + ", " + str(cos(self.q)*0.05) + ", " + str(sin(self.q)*0.05) + "\n")
                 
     
     # the world is a rectangular arena with width W and height H

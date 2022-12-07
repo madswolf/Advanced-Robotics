@@ -38,8 +38,8 @@ def plot():
     return vectors
 
 points = plot()
-for i in range(len(points)):
-    points[i] = points[i][50 - 1::50]
+#for i in range(len(points)):
+#    points[i] = points[i][50 - 1::50]
 
 shortest_trajectory_index = min(range(len(points)), key=lambda i: len(points[i]))
 row, col = points[shortest_trajectory_index].shape
@@ -117,7 +117,7 @@ def animate(i):
 
 print("plotting files: ", files)
 ani = FuncAnimation(fig, animate, frames=row,
-                    interval=10, repeat=True, repeat_delay=3000)
+                    interval=1, repeat=True, repeat_delay=3000)
 plt.show()
 
 # Save the animation as an animated GIF

@@ -40,7 +40,7 @@ else:
         raise Exception(f"Illegal robot type: {sys.argv[1]}")
 
 
-count = 50
+count = 28
 for i in range(count):
     for c in controllers:
         c.step(i)

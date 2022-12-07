@@ -20,7 +20,7 @@ class RobotController(ABC):
         self.state = None
         self.zone = None
         self.action = None
-        self.speed = 6.71
+        self.speed = 2.98
         self.distance_threshold = 0.15
         self.robot = robot
         self.last_action = -9999
