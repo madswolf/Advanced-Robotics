@@ -59,50 +59,70 @@ def disallow_illegal_actions(t: np.ndarray, is_seeker: bool):
 
     return t
 
-def export_run(arrs, fitness, name):
+def export_run(arrs, fitness, gen_number, group_number):
+    name = f"gen{str(gen_number)}_group{group_number}"
+    file = open(f"{evolution_data_folder}/{gen_number}_finished.txt", "a")
+    file.write(f"{group_number}\n")
+    file.flush()
+    file.close()
+
+    npy_file = open(f"{evolution_data_folder}/{name}.npy", "wb")
     for (arr,rew) in zip(arrs, fitness):
-        np.save(f"{evolution_data_folder}/{name}.npy", arr)
-        np.save(f"{evolution_data_folder}/{name}.npy", np.asarray([rew]))
+        np.save(npy_file, arr)
+        np.save(npy_file, np.asarray([rew]))
+    
+    npy_file.close()
         
-        file = open(f"{evolution_data_folder}/{name}_finished.txt", "w")
-        file.write(f"{name} + \n")
-        file.flush()
-        file.close()
 
-
-def import_run(name):
-    with open(f"{evolution_data_folder}{name}.npy", "rb") as f:
-        seeker = np.load(f)
-        seeker_fitness = np.load(f)[0]
-        avoiders = [(np.load(f), np.load(f)) for _ in range(8)]
-        return ((seeker, seeker_fitness), avoiders)
+def import_run(file_name):
+    file = open(f"{evolution_data_folder}/{file_name}","rb")
+    seeker = np.load(file)
+    seeker_fitness = np.load(file)[0]
+    avoiders = []
+    for _ in range(4):
+        avoider = np.load(file)
+        avoider_fitness = np.load(file)
+        avoiders.append((avoider, avoider_fitness))
+    return ((seeker, seeker_fitness), avoiders)
 
 
 def import_generation(number):
     files = os.listdir(evolution_data_folder)
-    this_gen = [s for s in files if f"gen{number}_group" in s]
+    this_gen = [s for s in files if s.startswith(f"gen{number}_group")]
     runs = [import_run(s) for s in this_gen]
-    return [(x[0], *x[1]) for x in runs] # (seekers, avoiders)
+    seekers = []
+    avoiders = []
+    for run in runs:
+        seekers.append(run[0])
+        for avoider in run[1]:
+            avoiders.append(avoider)
+            
+    return (seekers, avoiders) # (seekers, avoiders)
     
 
 def elitism(participants):
-    ranked = sorted(participants, key=lambda x: x[1])
+    sorter = lambda x: x[1]
+    ranked = sorted(participants, key=sorter)
     if len(ranked) % 2 != 0:
         raise "Generation has odd number of subjects. Cannot generate next generation"
-    return ranked[len(ranked)/2:]
+    return ranked[int(len(ranked)/2):]
 
 
 def pair_participants(participants):
     output = []
     for _ in range(4):
-        pairing_sequence = shuffle(range(len(participants)))
-        for i in range(len(pairing_sequence)):
-            if(i % 2 == 1):
-                pass
-            output.append(
-                participants[i],
-                participants[i+1]
-            )
+        pairing_sequence = list(range(len(participants)))
+        shuffle(pairing_sequence)
+        for i in range(0, len(pairing_sequence), 2):
+            #if(i % 2 == 1):
+            #    pass
+            pair_a_index = pairing_sequence[i]
+            pair_b_index = pairing_sequence[i+1]
+
+            output.append((
+                participants[pair_a_index],
+                participants[pair_b_index]
+            ))
     return output
 
 
@@ -112,22 +132,25 @@ def next_generation(number):
     surviving_avoiders = elitism(cur_avoiders)
     seeker_pairs = pair_participants(surviving_seekers)
     avoider_pairs = pair_participants(surviving_avoiders)
-    new_seekers = [breed(x[0], x[1], True) for x in seeker_pairs]
-    new_avoiders = [breed(x[0], x[1], False) for x in avoider_pairs]
+    new_seekers = [breed(x[0][0], x[1][0], True) for x in seeker_pairs]
+    new_avoiders = [breed(x[0][0], x[1][0], False) for x in avoider_pairs]
 
     return new_seekers, new_avoiders
 
 
 def export_gen_groups(participants, number):
-    if len(participants[0]) != len(participants[1]) * 4:
-        raise "Incorrect seeker/avoider ratio"
+    if len(participants[0]) * 4 != len(participants[1]):
+        raise Exception("Incorrect seeker/avoider ratio")
     
     for i in range(len(participants[0])):
-        np.save(f"{evolution_data_folder}/gen{number}_input_group{i}.npy", participants[0][i])
-        np.save(f"{evolution_data_folder}/gen{number}_input_group{i}.npy", participants[1][i*4])
-        np.save(f"{evolution_data_folder}/gen{number}_input_group{i}.npy", participants[1][i*4+1])
-        np.save(f"{evolution_data_folder}/gen{number}_input_group{i}.npy", participants[1][i*4+2])
-        np.save(f"{evolution_data_folder}/gen{number}_input_group{i}.npy", participants[1][i*4+3])
+        file = open(f"{evolution_data_folder}/gen{number}_input_group{i}.npy", "wb")
+        np.save(file, participants[0][i])
+        np.save(file, participants[1][i*4])
+        np.save(file, participants[1][i*4+1])
+        np.save(file, participants[1][i*4+2])
+        np.save(file, participants[1][i*4+3])
+        file.flush()
+        file.close()
 
 
 def import_gen_group(number, group):
@@ -135,3 +158,7 @@ def import_gen_group(number, group):
         seeker = np.load(f)
         avoiders = [np.load(f) for _ in range(4)]
         return seeker, avoiders
+
+
+if __name__ == "__main__":
+    print(next_generation(0))

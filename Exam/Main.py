@@ -45,13 +45,16 @@ for i in range(count):
     for c in controllers:
         c.step(i)
 
-for c in controllers:
-    gen_number = int(sys.argv[sys.argv.index("--import-generation")+1])+1
-    group_number = sys.argv[sys.argv.index("--import-generation")+2]
-    if "--import-generation" in sys.argv:
-        arrs, fitness = [(c.Q, c.total_reward) for c in reversed(controllers)]
-        export_run(arrs, fitness, name=f"gen{str(gen_number)}_group{group_number}")
-    else:
+
+if "--import-generation" in sys.argv:
+        gen_number = int(sys.argv[sys.argv.index("--import-generation")+1])
+        group_number = sys.argv[sys.argv.index("--import-generation")+2]
+        arrs, fitness = zip(*[(c.Q, c.total_reward()) for c in reversed(controllers)])
+        export_run(arrs, fitness, gen_number, group_number)
+else:
+    for c in controllers:
         if type(c) == Controllers.AvoiderController:
             print(c.robot.name, c.Q)
         print(c.total_reward())
+        arrs, fitness = zip(*[(c.Q, c.total_reward()) for c in reversed(controllers)])
+        print(fitness)
