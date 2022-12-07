@@ -1,12 +1,15 @@
 from .RobotController import RobotController
 from Models import Colors, Zones, Actions, States
+from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions
 
 class AvoiderController(RobotController):
-    def __init__(self, robot):
-        super().__init__(robot)
+    def __init__(self, robot, Qtable):
+        super().__init__(robot, Qtable)
         self.robot.set_color(Colors.Blue)
-        self.illegal_zone_actions.append((Actions.Forward, Zones.Safe)) # TODO remove after safe zone logik)
-        self.illegal_zone_actions.append((Actions.Right, Zones.Safe)) # TODO remove after safe zone logik)
+        self.illegal_zone_actions = IllegalZoneActions.Avoider # TODO remove after safe zone logik)
+        self.illegal_actions = IllegalActions.Avoider
+        self.illegal_state_actions = IllegalStateActions.Avoider
+        self.time_alive = 0
 
     def get_reward(self, action, state, zone):
         if action == Actions.Forward:
@@ -18,8 +21,12 @@ class AvoiderController(RobotController):
         else:
             return 1
 
+    def total_reward(self):
+        return self.time_alive
+
     def step(self, count):
         if not self.robot.tagged:
+            self.time_alive = count
             super().step(count)
             if self.robot.get_zone() == Zones.Safe:
                 self.robot.set_color(Colors.Green)

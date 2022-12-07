@@ -9,10 +9,11 @@ from .Robots.ControllableRobot import ControllableRobot
 from Models.States import States
 from Models.Actions import Actions
 from Models.Zones import Zones
+from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions
 
 
 class RobotController(ABC):
-    def __init__(self, robot: ControllableRobot):
+    def __init__(self, robot: ControllableRobot, Qtable: np.ndarray):
         # Variables 
         ###########
 
@@ -24,27 +25,23 @@ class RobotController(ABC):
         self.robot = robot
         self.last_action = -9999
         self.total_steps = 0
-        self.total_reward = 0
         self.speeds = [0,0]
+        self.state_statistics = [0 for _ in range(10)]
 
         #Learning (Actions, states, zones)
-        self.Q = np.zeros((3,10,5))
-        self.illegal_zone_actions = [
-            (Actions.Forward, Zones.EdgeFront),
-            (Actions.Forward, Zones.EdgeLeft),
-            (Actions.Forward, Zones.EdgeRight),
-            #(Actions.Left, Zones.EdgeLeft),
-            #(Actions.Right, Zones.EdgeRight),
-        ]
-        self.illegal_state_actions = [
-            # when a robot is in the way, seen with robot_in_way, then forward illegal
-        ]
-        self.illegal_actions = []
+        self.Q = Qtable
+        self.illegal_zone_actions = IllegalZoneActions.General
+        self.illegal_state_actions = IllegalStateActions.General
+        self.illegal_actions = IllegalActions.General
 
 
     #Abstract Methods
     @abstractmethod
     def get_reward(self, action, state, zone):
+        pass
+
+    @abstractmethod
+    def total_reward(self):
         pass
 
 
@@ -61,13 +58,13 @@ class RobotController(ABC):
         # if we are stuck in this robot in the way state for a long time,
         # for example 1000 count, then we should just allow forward to push people out of the way
         if is_robot_in_way[0] and count - self.last_action < 1000: 
-            avoid_action = Actions.Left if is_robot_in_way[1] < 0 else Actions.Right
+            avoid_action = Actions.Left
             self.speeds = self.speed_from_action(avoid_action)
         else:
             if (new_state != self.state or new_zone != self.zone or self.action is None) and (count - self.last_action > 30 or self.action not in [Actions.Left, Actions.Right]):
-
-                if self.action != None:
-                    self.update_table(self.action, self.state, new_state, self.zone, new_zone)
+                self.state_statistics[new_state] += 1
+                #if self.action != None:
+                #    self.update_table(self.action, self.state, new_state, self.zone, new_zone)
 
                 if random() <= 0.2:
                 # explore
