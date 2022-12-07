@@ -226,11 +226,23 @@ class Simio(ControllableRobot):
         y2b = self.y + sin(angle2 - back_fov) * Simio.receive_range
         back_triangle = Polygon(LinearRing([(self.x, self.y), (x1b, y1b), (x2b, y2b)]))
         
+        within_triangles = []
+
         for simio in Simios:
             if simio == self:
                 continue
             if front_triangle.intersects(simio.robot_circle) or back_triangle.intersects(simio.robot_circle):
-                if -radians(Simio.front_angle / 2) < simio.q - self.q < radians(Simio.front_angle / 2) or \
+                within_triangles.append(simio)
+        
+        for simio in within_triangles:
+            # cast ray from simio to self and see if it hits any other simio on the way
+            ray = LineString([(simio.x, simio.y), (self.x, self.y)])
+            for simio2 in within_triangles:
+                if simio2 == simio or simio2 == self:
+                    continue
+                if ray.intersects(simio2.robot_circle):
+                    break
+            if -radians(Simio.front_angle / 2) < simio.q - self.q < radians(Simio.front_angle / 2) or \
                    -radians(Simio.back_angle / 2) < abs(simio.q - self.q) % pi < radians(Simio.back_angle / 2):
                     if simio.current_message == "1":
                         return simio.current_message

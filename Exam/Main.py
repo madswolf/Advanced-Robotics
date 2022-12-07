@@ -33,9 +33,9 @@ if "--simulated" in sys.argv:
     ]
 else:
     if sys.argv[1] == "avoider":
-        Controllers.AvoiderController(Robots.Thymio(), Qtables[1])
+        controllers = [Controllers.AvoiderController(Robots.Thymio(), Qtables[1])]
     elif sys.argv[1] == "seeker":
-        Controllers.SeekerController(Robots.Thymio(), Qtables[0])
+        controllers = [Controllers.SeekerController(Robots.Thymio(), Qtables[0])]
     else:
         raise Exception(f"Illegal robot type: {sys.argv[1]}")
 
