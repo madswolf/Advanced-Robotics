@@ -22,8 +22,6 @@ class Thymio(ControllableRobot):
         self.color = Colors.Blue
 
     def drive(self, left_wheel_speed, right_wheel_speed):
-        #print("Left_wheel_speed: " + str(left_wheel_speed))
-        #print("Right_wheel_speed: " + str(right_wheel_speed))
         left_wheel = left_wheel_speed
         right_wheel = right_wheel_speed
 
@@ -35,7 +33,8 @@ class Thymio(ControllableRobot):
     def robot_in_way(self): # (horizontal[5], ground[2])
         values = list(self.aseba.GetVariable("thymio-II", "prox.horizontal"))[:5]
         angles = [-40, -20, 0, 20, 40]
-        highest = max([(x, angles[i]) for x,i in enumerate(values)], key=lambda item: item[0])
+        stuff = [(x, angles[i]) for i,x in enumerate(values)]
+        highest = max(stuff, key=lambda item: item[0])
         if(highest[0] < 200):
             return (True, highest[1])
         else:
@@ -43,7 +42,7 @@ class Thymio(ControllableRobot):
 
 
     def get_zone(self):
-        reflected = list(self.aseba.GetVariable("thymio-II", "prox.ground.reflected")),
+        reflected = list(self.aseba.GetVariable("thymio-II", "prox.ground.reflected"))
         ambient = list(self.aseba.GetVariable("thymio-II", "prox.ground.ambiant"))
         
         ambient_high = ambient[0] > 0 or ambient[1] > 0

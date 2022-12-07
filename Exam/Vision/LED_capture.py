@@ -87,7 +87,7 @@ def process(frame, color):
 
   detector = cv2.SimpleBlobDetector_create(params)
 
-  keypoints = detector.detect(thresh)
+  keypoints = list(detector.detect(thresh))
   keypoints.sort(key=lambda point: point.size)
 
   #print("keypoint amount: " + str(len(keypoints)))
