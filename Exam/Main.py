@@ -40,11 +40,14 @@ else:
         raise Exception(f"Illegal robot type: {sys.argv[1]}")
 
 
-count = 10000
+count = 50
 for i in range(count):
     for c in controllers:
         c.step(i)
 
+
+for c in controllers:
+    c.stop()
 
 if "--import-generation" in sys.argv:
         gen_number = int(sys.argv[sys.argv.index("--import-generation")+1])

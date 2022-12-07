@@ -20,11 +20,12 @@ class Thymio(ControllableRobot):
     def __init__(self):
         super().__init__()
         self.aseba = self.setup()
+        self.name = "idiot robot"
         self.color = Colors.Blue
 
     def drive(self, left_wheel_speed, right_wheel_speed):
-        left_wheel = left_wheel_speed
-        right_wheel = right_wheel_speed
+        left_wheel = left_wheel_speed * 200
+        right_wheel = right_wheel_speed * 200
 
         self.aseba.SendEventName("motor.target", [left_wheel, right_wheel])
 
@@ -36,7 +37,7 @@ class Thymio(ControllableRobot):
         angles = [-40, -20, 0, 20, 40]
         stuff = [(x, angles[i]) for i,x in enumerate(values)]
         highest = max(stuff, key=lambda item: item[0])
-        if(highest[0] < 200):
+        if(highest[0] > 200):
             return (True, highest[1])
         else:
             return (False, None)
@@ -46,27 +47,35 @@ class Thymio(ControllableRobot):
         reflected = list(self.aseba.GetVariable("thymio-II", "prox.ground.reflected"))
         ambient = list(self.aseba.GetVariable("thymio-II", "prox.ground.ambiant"))
         
-        ambient_high = ambient[0] > 0 or ambient[1] > 0
+        #faulty first reading so we force it high
+        if reflected == [0,0]:
+            reflected = [1000, 1000]
+            print("setting reflected to 1000 1000", reflected)
+        
+        # when the sun is down, the ambient is always low. Maybe we want a night mode and a day mode where night only uses reflected?
+
+        ambient_left_high = ambient[0] > 0
+        ambient_right_high = ambient[1] > 0
         reflected_left_high = reflected[0] > 400
         reflected_right_high = reflected[1] > 400
 
-
-        if ambient_high:
+        if (ambient_left_high and reflected_left_high) or (ambient_right_high and reflected_right_high):
             return Zones.Normal
-        elif reflected_left_high or reflected_right_high:
+        elif (not ambient_left_high and reflected_left_high) or (not ambient_right_high and reflected_right_high):
             return Zones.Safe
         else:
-            if not reflected_left_high:
-                return Zones.EdgeLeft
-            elif not reflected_right_high:
-                return Zones.EdgeRight
-            else:
+            if (not ambient_left_high and not reflected_left_high) and (not ambient_right_high and not reflected_right_high):
                 return Zones.EdgeFront
+            elif not ambient_right_high and not reflected_right_high:
+                return Zones.EdgeRight
+            elif not ambient_left_high and not reflected_left_high:
+                return Zones.EdgeLeft
+            else: 
+                return Zones.Normal
                 
-        
 
     def transmit(self, message):
-        self.aseba.SendEventName("prox.comm.tx", [message])
+        self.aseba.SendEventName("prox.comm.tx", [int(message)])
 
 
     def receive(self):
