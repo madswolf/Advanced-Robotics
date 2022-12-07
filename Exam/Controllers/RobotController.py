@@ -44,13 +44,16 @@ class RobotController(ABC):
     def total_reward(self):
         pass
 
+    def stop(self):
+        self.robot.stop()
 
     #Methods
     def step(self, count):
         self.total_steps += 1
         new_zone = self.robot.get_zone()
         new_state = self.robot.get_state()
-
+        
+        print(new_zone, new_state)
         if count - self.last_action > 100:
             self.action = None
 
@@ -58,10 +61,11 @@ class RobotController(ABC):
         # if we are stuck in this robot in the way state for a long time,
         # for example 1000 count, then we should just allow forward to push people out of the way
         if is_robot_in_way[0] and count - self.last_action < 1000: 
+            print("something in way")
             avoid_action = Actions.Left
             self.speeds = self.speed_from_action(avoid_action)
         else:
-            if (new_state != self.state or new_zone != self.zone or self.action is None) and (count - self.last_action > 30 or self.action not in [Actions.Left, Actions.Right]):
+            if (new_state != self.state or new_zone != self.zone or self.action is None) and (count - self.last_action > 3 or self.action not in [Actions.Left, Actions.Right]):
                 self.state_statistics[new_state] += 1
                 #if self.action != None:
                 #    self.update_table(self.action, self.state, new_state, self.zone, new_zone)
@@ -88,7 +92,8 @@ class RobotController(ABC):
         return np.max(self.Q[:, state, zone])
 
     def best_action(self, state, zone):
-        return np.argmax(self.Q[:, state, zone])
+        action = np.argmax(self.Q[:, state, zone])
+        return action
 
     def update_table(self, action, state, new_state, zone, new_zone):
         alpha = 0.1

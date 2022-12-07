@@ -21,7 +21,7 @@ def get_keypoints(color):
     subprocess.check_call(raspistill)
   except Exception as e:
     print("error taking photo")
-    return [None]
+    return []
 
   frame = cv2.imread(tmpname)[170:,:] #crop to 640x290 and taking the bottom part
   keypoints = process(frame, color)
@@ -38,7 +38,7 @@ def main():
     subprocess.check_call(raspistill)
   except Exception as e:
     print("error taking photo")
-    return [None]
+    return []
 
   frame = cv2.imread(tmpname)[170:,:] #crop to 640x310 and taking the bottom part
   

@@ -37,8 +37,8 @@ class IllegalZoneActions:
     ]
 
     Avoider = General + [
-        (Actions.Forward, Zones.Safe), # TODO remove after safe zone logic
-        (Actions.Right, Zones.Safe)
+        #(Actions.Forward, Zones.Safe), # TODO remove after safe zone logic
+        #(Actions.Right, Zones.Safe)
     ]
 
     Seeker = General + [

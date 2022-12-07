@@ -40,18 +40,23 @@ else:
         raise Exception(f"Illegal robot type: {sys.argv[1]}")
 
 
-count = 10000
+count = 50
 for i in range(count):
     for c in controllers:
         c.step(i)
 
 for c in controllers:
-    gen_number = int(sys.argv[sys.argv.index("--import-generation")+1])+1
-    group_number = sys.argv[sys.argv.index("--import-generation")+2]
+    c.stop()
+
+
+for c in controllers:
     if "--import-generation" in sys.argv:
+        group_number = sys.argv[sys.argv.index("--import-generation")+2]
+        gen_number = int(sys.argv[sys.argv.index("--import-generation")+1])+1
         arrs, fitness = [(c.Q, c.total_reward) for c in reversed(controllers)]
         export_run(arrs, fitness, name=f"gen{str(gen_number)}_group{group_number}")
     else:
         if type(c) == Controllers.AvoiderController:
             print(c.robot.name, c.Q)
         print(c.total_reward())
+
