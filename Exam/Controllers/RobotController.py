@@ -20,7 +20,7 @@ class RobotController(ABC):
         self.state = None
         self.zone = None
         self.action = None
-        self.speed = 1
+        self.speed = 6.71
         self.distance_threshold = 0.15
         self.robot = robot
         self.last_action = -9999
@@ -53,7 +53,6 @@ class RobotController(ABC):
         new_zone = self.robot.get_zone()
         new_state = self.robot.get_state()
         
-        print(new_zone, new_state)
         if count - self.last_action > 100:
             self.action = None
 

@@ -24,8 +24,9 @@ class Thymio(ControllableRobot):
         self.color = Colors.Blue
 
     def drive(self, left_wheel_speed, right_wheel_speed):
-        left_wheel = left_wheel_speed * 200
-        right_wheel = right_wheel_speed * 200
+        # we want these numbers to be [395, 400] so thats what the multipliers are for
+        left_wheel = left_wheel_speed * 58.83 # 1.25% less on left wheel because it slingre slightly to the right
+        right_wheel = right_wheel_speed * 59.57
 
         self.aseba.SendEventName("motor.target", [left_wheel, right_wheel])
 
