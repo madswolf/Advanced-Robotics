@@ -9,6 +9,7 @@ from .ControllableRobot import ControllableRobot
 
 class Thymio(ControllableRobot): 
     color_state_pairs = {
+        
         Colors.Red: States.SeekerFront,
         Colors.Orange: States.SeekerFront,
         Colors.Blue: States.AvoiderFront,
@@ -22,8 +23,8 @@ class Thymio(ControllableRobot):
         self.color = Colors.Blue
 
     def drive(self, left_wheel_speed, right_wheel_speed):
-        left_wheel = left_wheel_speed
-        right_wheel = right_wheel_speed
+        left_wheel = left_wheel_speed * 200
+        right_wheel = right_wheel_speed * 200
 
         self.aseba.SendEventName("motor.target", [left_wheel, right_wheel])
 
