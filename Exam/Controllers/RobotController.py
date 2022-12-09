@@ -20,7 +20,7 @@ class RobotController(ABC):
         self.state = None
         self.zone = None
         self.action = None
-        self.speed = 2.98
+        self.speed = 1
         self.distance_threshold = 0.15
         self.robot = robot
         self.last_action = -9999
@@ -60,7 +60,6 @@ class RobotController(ABC):
         # if we are stuck in this robot in the way state for a long time,
         # for example 1000 count, then we should just allow forward to push people out of the way
         if is_robot_in_way[0] and count - self.last_action < 1000: 
-            print("something in way")
             avoid_action = Actions.Left
             self.speeds = self.speed_from_action(avoid_action)
         else:

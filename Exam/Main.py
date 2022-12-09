@@ -1,7 +1,7 @@
 import sys
 import Controllers as Controllers
 import Controllers.Robots as Robots
-from Evolution import build_table_random, import_gen_group, export_run
+from Evolution import build_table_random, import_gen_group, import_gen_best, export_run
 
 
 Qtables = []
@@ -12,6 +12,16 @@ if "--import-generation" in sys.argv:
     Qtables = [
         group[0],
         *group[1]
+    ]
+elif "--import-generation-best" in sys.argv:
+    gen_number = sys.argv[sys.argv.index("--import-generation-best")+1]
+    group = import_gen_best(gen_number)
+    Qtables = [
+        group[0],
+        group[1],
+        group[1],
+        group[1],
+        group[1]
     ]
 else:
     Qtables = [
@@ -40,8 +50,10 @@ else:
         raise Exception(f"Illegal robot type: {sys.argv[1]}")
 
 
-count = 28
+count = 1000
 for i in range(count):
+    if i%100 == 0:
+        print(i)
     for c in controllers:
         c.step(i)
 

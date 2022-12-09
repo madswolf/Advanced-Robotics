@@ -33,9 +33,6 @@ class IllegalZoneActions:
         (Actions.Forward, Zones.EdgeRight),
         (Actions.Left, Zones.EdgeFront),
         (Actions.Left, Zones.EdgeLeft),
-        (Actions.Left, Zones.EdgeRight),
-        (Actions.Left, Zones.Normal),
-        (Actions.Right, Zones.Normal)
     ]
 
     Avoider = General + [

@@ -7,13 +7,14 @@ from Models import Zones, States, Colors
 import os
 import random
 from math import atan, radians, cos, sin
+import sys
 
 from .ControllableRobot import ControllableRobot
 
 Simios = []
 
-start_positions = [(-0.9, -0.4), (-0.8, 0.4), (-0.8, 0.4), (-0.8, 0.4), (-0.8, 0.4)] # seeker is always last
-#start_positions = [(-0.8, -0.4), (-0.8, 0.4), (0.8, 0.4), (0.8, -0.4), (0.0, 0.4)] # seeker is always last
+#start_positions = [(-0.9, -0.4), (-0.8, 0.4), (-0.8, 0.4), (-0.8, 0.4), (-0.8, 0.4)] # seeker is always last
+start_positions = [(-0.8, -0.4), (-0.8, 0.4), (0.8, 0.4), (0.8, -0.4), (0.0, 0.4)] # seeker is always last
 names = ["Hamilton", "Stroll", "Lando", "Alonso", "Verstappen"]
 
 class Simio(ControllableRobot):
@@ -30,6 +31,7 @@ class Simio(ControllableRobot):
     camera_range = 1
     front_angle = 80
     back_angle = 40
+    simulation_speed = 2.98 * 0.90
 
     def __init__(self):
         super().__init__()
@@ -38,7 +40,7 @@ class Simio(ControllableRobot):
         self.name = names[len(Simios)]
         self.x = start_positions[len(Simios)][0]   # robot position in meters - x direction - positive to the right 
         self.y = start_positions[len(Simios)][1]   # robot position in meters - y direction - positive up
-        self.q = 0 #random.random() * pi  # robot heading with respect to x-axis in radians 
+        self.q = random.random() * pi  # robot heading with respect to x-axis in radians 
         self.robot_circle = Point(self.x, self.y).buffer(Simio.L)
         self.left_wheel_velocity = 0.0
         self.right_wheel_velocity = 0.0
@@ -62,7 +64,8 @@ class Simio(ControllableRobot):
         self.q += omega #* Simio.simulation_timestep
         self.robot_circle = Point(self.x, self.y).buffer(Simio.L)
         #if step % 5 == 0:
-        self.file.write( str(self.x) + ", " + str(self.y) + ", " + str(cos(self.q)*0.05) + ", " + str(sin(self.q)*0.05) + "\n")
+        if "--no-visualization" not in sys.argv:
+            self.file.write( str(self.x) + ", " + str(self.y) + ", " + str(cos(self.q)*0.05) + ", " + str(sin(self.q)*0.05) + "\n")
                 
     
     # the world is a rectangular arena with width W and height H
@@ -250,8 +253,8 @@ class Simio(ControllableRobot):
         return None
 
     def drive(self, left_speed, right_speed):
-        self.left_wheel_velocity = left_speed
-        self.right_wheel_velocity = right_speed
+        self.left_wheel_velocity = left_speed * self.simulation_speed
+        self.right_wheel_velocity = right_speed * self.simulation_speed
         self.simulationstep()
 
     def stop(self):

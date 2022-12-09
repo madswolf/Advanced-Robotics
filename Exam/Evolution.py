@@ -125,9 +125,22 @@ def pair_participants(participants):
             ))
     return output
 
+def export_alpha_and_omega(seekers, avoiders, number):
+    sorter = lambda x: x[1]
+    best_seeker = sorted(seekers, key=sorter)[len(seekers)-1]
+    best_avoider = sorted(avoiders, key=sorter)[len(seekers)-1]
+    file = open(f"{evolution_data_folder}/gen{number}_alpha_omega_sigma.npy", "wb")
+    np.save(file,best_seeker[0])
+    np.save(file,best_avoider[0])
+    finished_file = open(f"{evolution_data_folder}/{number}_finished.txt", "a")
+    finished_file.write("best seeker reward: " + str(best_seeker[1]) + "\n")
+    finished_file.write("best avoider reward: " + str(best_avoider[1]) + "\n")
+    file.flush()
+    file.close()
 
 def next_generation(number):
     cur_seekers, cur_avoiders = import_generation(number)
+    export_alpha_and_omega(cur_seekers, cur_avoiders, number)
     surviving_seekers = elitism(cur_seekers)
     surviving_avoiders = elitism(cur_avoiders)
     seeker_pairs = pair_participants(surviving_seekers)
@@ -158,6 +171,13 @@ def import_gen_group(number, group):
         seeker = np.load(f)
         avoiders = [np.load(f) for _ in range(4)]
         return seeker, avoiders
+
+def import_gen_best(number):
+    #gen0_alpha_omega_sigma.npy
+    with open(f"{evolution_data_folder}/gen{number}_alpha_omega_sigma.npy", "rb") as f:
+        seeker = np.load(f)
+        avoider = np.load(f)
+        return seeker, avoider
 
 
 if __name__ == "__main__":
