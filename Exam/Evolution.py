@@ -129,13 +129,15 @@ def pair_participants(participants):
 def export_alpha_and_omega(seekers, avoiders, number):
     sorter = lambda x: x[1]
     best_seeker = sorted(seekers, key=sorter)[len(seekers)-1]
-    best_avoider = sorted(avoiders, key=sorter)[len(seekers)-1]
+    best_avoider = sorted(avoiders, key=sorter)[len(avoiders)-1]
     file = open(f"{evolution_data_folder}/gen{number}_alpha_omega_sigma.npy", "wb")
     np.save(file,best_seeker[0])
     np.save(file,best_avoider[0])
     finished_file = open(f"{evolution_data_folder}/{number}_finished.txt", "a")
     finished_file.write("best seeker reward: " + str(best_seeker[1]) + "\n")
     finished_file.write("best avoider reward: " + str(best_avoider[1]) + "\n")
+    finished_file.write("average seeker reward: " + str(sum(x[1] for x in seekers)/len(seekers)) + "\n")
+    finished_file.write("average avoider reward: " + str((sum(x[1] for x in avoiders)/len(avoiders))) + "\n")
     file.flush()
     file.close()
 

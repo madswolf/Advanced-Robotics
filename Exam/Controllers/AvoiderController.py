@@ -33,6 +33,8 @@ class AvoiderController(RobotController):
         if not self.robot.tagged:
             if self.seeker_controller is not None:
                 dist = math.dist([self.robot.x, self.robot.y], [self.seeker_controller.robot.x, self.seeker_controller.robot.y])
+                if self.state in [States.SeekerFront, States.SeekerLeft, States.SeekerRight]:
+                    dist = dist / 4    
                 self.total_distance_from_seeker += dist
             self.time_alive = count
             super().step(count)
