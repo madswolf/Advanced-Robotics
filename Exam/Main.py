@@ -52,7 +52,7 @@ if "--simulated" in sys.argv:
     ]
 else:
     if sys.argv[1] == "avoider":
-        controllers = [Controllers.AvoiderController(Robots.Thymio(), Qtables[1])]
+        controllers = [Controllers.AvoiderController(Robots.Thymio(), Qtables[1], None)]
     elif sys.argv[1] == "seeker":
         controllers = [Controllers.SeekerController(Robots.Thymio(), Qtables[0])]
     else:

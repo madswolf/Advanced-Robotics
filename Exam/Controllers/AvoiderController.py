@@ -2,7 +2,6 @@
 from .RobotController import RobotController
 from Models import Colors, Zones, Actions, States
 from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions
-from .Robots.Simio import Simios
 import math
 
 class AvoiderController(RobotController):
