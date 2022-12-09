@@ -52,7 +52,7 @@ class RobotController(ABC):
     def step(self, count):
         self.total_steps += 1
         new_zone = self.robot.get_zone()
-        new_state = self.robot.get_state()
+        #new_state = self.robot.get_state()
         
         if count - self.last_action > 5:
             self.action = None
