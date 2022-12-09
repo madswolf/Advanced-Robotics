@@ -138,6 +138,8 @@ class Thymio(ControllableRobot):
             'thympi.aesl', reply_handler=self.dbusError, error_handler=self.dbusError
         )
 
+        asebaNetwork.SendEventName("prox.comm.enable", [1])
+
         # scanning_thread = Process(target=robot.drive, args=(200,200,))
         return asebaNetwork
 

@@ -69,27 +69,27 @@ def animate(i):
         x = [xs, p[i, 2] + xs]
         y = [ys, p[i, 3] + ys]
         
-        if "Verstappen" in files[idx]:
-            front_fov = radians(40)
-            view_distance = 0.4
-            a = (y[1]-y[0]) / (x[1]-x[0])
-            angle = atan(a)
-            if x[1] < x[0]: angle -= pi
-            x1 = x[0] + cos(angle + front_fov) * view_distance
-            x2 = x[0] + cos(angle - front_fov) * view_distance
-            y1 = y[0] + sin(angle + front_fov) * view_distance
-            y2 = y[0] + sin(angle - front_fov) * view_distance
-            triangle = plt.Polygon([[x[0], y[0]], [x1, y1], [x2, y2]], color=color_from_file(files[idx]), alpha=0.5)
-            ax.add_patch(triangle)
+        #if "Verstappen" in files[idx]:
+        front_fov = radians(40)
+        view_distance = 0.2
+        a = (y[1]-y[0]) / (x[1]-x[0])
+        angle = atan(a)
+        if x[1] < x[0]: angle -= pi
+        x1 = x[0] + cos(angle + front_fov) * view_distance
+        x2 = x[0] + cos(angle - front_fov) * view_distance
+        y1 = y[0] + sin(angle + front_fov) * view_distance
+        y2 = y[0] + sin(angle - front_fov) * view_distance
+        triangle = plt.Polygon([[x[0], y[0]], [x1, y1], [x2, y2]], color=color_from_file(files[idx]), alpha=0.5)
+        ax.add_patch(triangle)
 
-            angle2 = angle+radians(180)
-            back_fov = radians(20)
-            x1b = x[0] + cos(angle2 + back_fov) * view_distance
-            x2b = x[0] + cos(angle2 - back_fov) * view_distance
-            y1b = y[0] + sin(angle2 + back_fov) * view_distance
-            y2b = y[0] + sin(angle2 - back_fov) * view_distance
-            triangle2 = plt.Polygon([[x[0], y[0]], [x1b, y1b], [x2b, y2b]], color=color_from_file(files[idx]), alpha=0.5)
-            ax.add_patch(triangle2)
+        angle2 = angle+radians(180)
+        back_fov = radians(20)
+        x1b = x[0] + cos(angle2 + back_fov) * view_distance
+        x2b = x[0] + cos(angle2 - back_fov) * view_distance
+        y1b = y[0] + sin(angle2 + back_fov) * view_distance
+        y2b = y[0] + sin(angle2 - back_fov) * view_distance
+        triangle2 = plt.Polygon([[x[0], y[0]], [x1b, y1b], [x2b, y2b]], color=color_from_file(files[idx]), alpha=0.5)
+        ax.add_patch(triangle2)
 
             
         circle = plt.Circle((xs, ys), 0.095, color=color_from_file(files[idx]), alpha=0.2)

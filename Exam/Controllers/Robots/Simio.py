@@ -15,7 +15,7 @@ from .ControllableRobot import ControllableRobot
 Simios = []
 
 #start_positions = [(-0.9, -0.4), (-0.8, 0.4), (-0.8, 0.4), (-0.8, 0.4), (-0.8, 0.4)] # seeker is always last
-start_positions = [(-0.8, -0.4), (-0.8, 0.4), (0.8, 0.4), (0.8, -0.4), (0.0, 0.4)] # seeker is always last
+start_positions = [(-0.0, -0.0), (-0.8, 0.4), (0.8, 0.4), (0.8, -0.4), (0.0, 0.4)] # seeker is always last
 names = ["Hamilton", "Stroll", "Lando", "Alonso", "Verstappen"]
 
 class Simio(ControllableRobot):
@@ -256,7 +256,7 @@ class Simio(ControllableRobot):
                     break
             if -radians(Simio.front_angle) < simio.q - self.q < radians(Simio.front_angle) or \
                    -radians(Simio.front_angle) < abs(simio.q - self.q) % pi < radians(Simio.back_angle):
-                    if simio.current_message == "1":
+                    if int(simio.current_message) in [1,2]:
                         return simio.current_message
         return None
 
