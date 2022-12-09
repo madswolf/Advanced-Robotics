@@ -28,7 +28,7 @@ class Simio(ControllableRobot):
     distance_threshold = 0.15  # distance threshold for collision avoidance
     robot_timestep = 0.1        # 1/robot_timestep equals update frequency of robot
     simulation_timestep = 0.01  # timestep in kinematics sim (probably don't touch..)
-    receive_range = 0.4
+    receive_range = 0.2
     camera_range = 2
     front_angle = 80
     back_angle = 40
