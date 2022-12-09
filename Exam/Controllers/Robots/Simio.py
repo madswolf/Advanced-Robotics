@@ -29,7 +29,7 @@ class Simio(ControllableRobot):
     robot_timestep = 0.1        # 1/robot_timestep equals update frequency of robot
     simulation_timestep = 0.01  # timestep in kinematics sim (probably don't touch..)
     receive_range = 0.2
-    camera_range = 2
+    camera_range = 10
     front_angle = 80
     back_angle = 40
     simulation_speed = 2.98 * 0.90

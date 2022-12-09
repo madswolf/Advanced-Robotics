@@ -49,7 +49,18 @@ class AvoiderController(RobotController):
                 super().step(count)
             if self.seeker_controller is not None:
                 dist = math.dist([self.robot.x, self.robot.y], [self.seeker_controller.robot.x, self.seeker_controller.robot.y])
+                if self.state in [States.SeekerFront, States.SeekerLeft, States.SeekerRight]:
+                    dist = dist / 4    
                 self.total_distance_from_seeker += dist * safe_zone_bonus_multiplier
+            self.time_alive = count
+            super().step(count)
+            our_zone = self.robot.get_zone()
+            if our_zone == Zones.Safe:
+                self.robot.set_color(Colors.Green)
+                #self.robot.transmit("2")
+            elif our_zone == Zones.Normal:
+                self.robot.set_color(Colors.Blue)
+                #self.robot.transmit("0")
             receive_message = self.robot.receive()
             if receive_message == "1" and (our_zone != Zones.Safe or self.safezone_prohibition+10 > count):
                 # At the moment, we dont clear this buffer or and we also dont in the safe zone until we get a two, which means that
