@@ -5,6 +5,7 @@ import dbus
 import dbus.mainloop.glib
 from Models import Colors, Zones, States
 import Vision.LED_capture as capture
+import time
 
 from .ControllableRobot import ControllableRobot
 
@@ -27,6 +28,8 @@ class Thymio(ControllableRobot):
     def drive(self, left_wheel_speed, right_wheel_speed):
         left_wheel = left_wheel_speed * 395 
         right_wheel = right_wheel_speed * 400
+        if left_wheel_speed == 0 and right_wheel_speed == 0:
+            time.sleep(0.1)
 
         self.aseba.SendEventName("motor.target", [left_wheel, right_wheel])
 
@@ -50,7 +53,6 @@ class Thymio(ControllableRobot):
         #faulty first reading so we force it high
         if reflected == [0,0]:
             reflected = [1000, 1000]
-            print("setting reflected to 1000 1000", reflected)
         
         # when the sun is down, the ambient is always low. Maybe we want a night mode and a day mode where night only uses reflected?
 
@@ -85,6 +87,7 @@ class Thymio(ControllableRobot):
 
     def receive(self):
         rx = self.aseba.GetVariable("thymio-II", "prox.comm.rx")
+        self.aseba.SetVariable("thymio-II", "prox.comm.rx", [0])
         if rx[0] != 0:
             return rx[0]
         return None

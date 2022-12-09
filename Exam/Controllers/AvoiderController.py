@@ -53,21 +53,15 @@ class AvoiderController(RobotController):
                     dist = dist / 4    
                 self.total_distance_from_seeker += dist * safe_zone_bonus_multiplier
             self.time_alive = count
-            super().step(count)
-            our_zone = self.robot.get_zone()
-            if our_zone == Zones.Safe:
-                self.robot.set_color(Colors.Green)
-                #self.robot.transmit("2")
-            elif our_zone == Zones.Normal:
-                self.robot.set_color(Colors.Blue)
-                #self.robot.transmit("0")
             receive_message = self.robot.receive()
-            if receive_message == "1" and (our_zone != Zones.Safe or self.safezone_prohibition+10 > count):
+            print(receive_message)
+            if receive_message == 1 and (our_zone != Zones.Safe or self.safezone_prohibition+10 > count):
                 # At the moment, we dont clear this buffer or and we also dont in the safe zone until we get a two, which means that
                 # we will get tagged the moment we leave the safe zone, if we dont get a random different message before that.
                 print("oiv bruv i got fokken tagged lad ffs right fooken bummer that 1 mate, hilsen " + self.robot.name)
                 self.robot.tagged = True
             elif receive_message == 2 and our_zone == Zones.Safe:
+                print("told to gtfo")
                 self.robot.set_color(Colors.Blue)
                 self.robot.transmit(0)
                 self.safezone_prohibition = count
