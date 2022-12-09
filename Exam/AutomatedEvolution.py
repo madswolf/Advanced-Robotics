@@ -5,7 +5,7 @@ from Evolution import build_table_random, export_gen_groups, next_generation
 import time
 
 evolution_data_folder = "Exam/EvolutionData"
-groups_per_run = 8
+groups_per_run = 16
 
 def generate_gen0_input():
     print("generating")
@@ -46,7 +46,7 @@ def simulate_gen(current_gen):
         subprocess.Popen(f"python Exam/Main.py --simulated --no-visualization --import-generation {current_gen} {i}",stdout=log, shell=False)
     while not check_generation_finished(current_gen, groups):
         print("waiting")
-        if time.time() - start > 120:
+        if time.time() - start > 30:
             simulate_gen(current_gen)
             return
         time.sleep(1)
