@@ -29,7 +29,7 @@ class Simio(ControllableRobot):
     robot_timestep = 0.1        # 1/robot_timestep equals update frequency of robot
     simulation_timestep = 0.01  # timestep in kinematics sim (probably don't touch..)
     receive_range = 0.4
-    camera_range = 1
+    camera_range = 2
     front_angle = 80
     back_angle = 40
     simulation_speed = 2.98 * 0.90
@@ -117,6 +117,13 @@ class Simio(ControllableRobot):
     def placement_in_view(self, other):
         view_triangle = Polygon(LinearRing([(self.x, self.y), (self.x+cos(self.q)*self.camera_range,(self.y+sin(self.q)*self.camera_range)), (self.x+cos(self.q+pi/2)*self.camera_range,(self.y+sin(self.q+pi/2)*self.camera_range))]))
         if view_triangle.overlaps(other.robot_circle):
+            # send a ray from self to other and see if it intersects another robot on the way
+            projection = LineString([(self.x, self.y), (other.x, other.y)])
+            for simio in Simios:
+                if simio == self or simio == simio.other:
+                    continue
+                if projection.intersects(simio.robot_circle):
+                    return None
             ## is on left side of robot
             if (other.x-self.x)*cos(self.q) + (other.y-self.y)*sin(self.q) > 0.2:
                 return 'left'
