@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os, sys, subprocess, time
 from yaspin import yaspin
 from Evolution import build_table_random, export_gen_groups, next_generation

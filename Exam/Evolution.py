@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import numpy as np
 from random import random, shuffle
 import os

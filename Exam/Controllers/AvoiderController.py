@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from .RobotController import RobotController
 from Models import Colors, Zones, Actions, States
 from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions

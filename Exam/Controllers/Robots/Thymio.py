@@ -1,5 +1,6 @@
+#!/usr/bin/python3
 import os
-os.system("(asebamedulla ser:name=Thymio-II &) && sleep 0.3")
+os.system("(asebamedulla ser:name=Thymio-II &) && sleep 3.3")
 import dbus
 import dbus.mainloop.glib
 from Models import Colors, Zones, States
@@ -58,7 +59,6 @@ class Thymio(ControllableRobot):
         ambient_right_high = ambient[1] > 0
         reflected_left_high = reflected[0] > 400
         reflected_right_high = reflected[1] > 400
-
         if (ambient_left_high and reflected_left_high) or (ambient_right_high and reflected_right_high):
             return Zones.Normal
         elif (not ambient_left_high and reflected_left_high) or (not ambient_right_high and reflected_right_high):
@@ -208,4 +208,3 @@ class Thymio(ControllableRobot):
         self.aseba.SendEventName("leds.temperature", [0,0])
         self.aseba.SendEventName("leds.sound", [0])
         self.aseba.SendEventName("leds.circle", [32,32,32,32,32,32,32,32])
-        

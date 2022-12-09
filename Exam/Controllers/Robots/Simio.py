@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import time
 from shapely import affinity
 from shapely.geometry import LinearRing, LineString, Point, Polygon

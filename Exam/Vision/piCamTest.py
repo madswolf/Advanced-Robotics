@@ -1,7 +1,7 @@
 # tracking.py
 # Created by Michael Marek (2016)
 # Track the position of tennis balls in a webcam video feed.
-
+#!/usr/bin/python3
 import cv2
 import numpy as np
 import subprocess

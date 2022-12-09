@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import sys
 import Controllers as Controllers
 import Controllers.Robots as Robots

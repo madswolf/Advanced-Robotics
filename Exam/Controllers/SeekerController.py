@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from .RobotController import RobotController
 import sys
 if "--simulated" in sys.argv:

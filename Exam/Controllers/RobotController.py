@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from abc import ABC, abstractmethod
 import numpy as np
 from random import random, randint
@@ -63,6 +64,11 @@ class RobotController(ABC):
             avoid_action = Actions.Right
             self.speeds = self.speed_from_action(avoid_action)
         else:
+            if new_zone not in [Zones.EdgeFront, Zones.EdgeRight, Zones.EdgeLeft]:
+                new_state = self.robot.get_state()
+            else:
+                new_state = States.NoObs
+
             if (new_state != self.state or new_zone != self.zone or self.action is None) and (count - self.last_action > 0 or self.action not in [Actions.Left, Actions.Right]):
                 self.state_statistics[new_state] += 1
                 #if self.action != None:
