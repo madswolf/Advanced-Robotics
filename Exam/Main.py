@@ -34,12 +34,20 @@ else:
 
 controllers = []
 if "--simulated" in sys.argv:
+    simios = [
+        Robots.Simio(),
+        Robots.Simio(),
+        Robots.Simio(),
+        Robots.Simio(),
+        Robots.Simio()
+    ]
+    seeker = Controllers.SeekerController(simios[4], Qtables[0])
     controllers = [
-        Controllers.AvoiderController(Robots.Simio(), Qtables[1]),
-        Controllers.AvoiderController(Robots.Simio(), Qtables[2]),
-        Controllers.AvoiderController(Robots.Simio(), Qtables[3]),
-        Controllers.AvoiderController(Robots.Simio(), Qtables[4]),
-        Controllers.SeekerController(Robots.Simio(), Qtables[0]) # seeker is always last
+        Controllers.AvoiderController(simios[0], Qtables[1], seeker),
+        Controllers.AvoiderController(simios[1], Qtables[2], seeker),
+        Controllers.AvoiderController(simios[2], Qtables[3], seeker),
+        Controllers.AvoiderController(simios[3], Qtables[4], seeker),
+        seeker # seeker is always last
     ]
 else:
     if sys.argv[1] == "avoider":

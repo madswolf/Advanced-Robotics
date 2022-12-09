@@ -246,8 +246,8 @@ class Simio(ControllableRobot):
                     continue
                 if ray.intersects(simio2.robot_circle):
                     break
-            if -radians(Simio.front_angle / 2) < simio.q - self.q < radians(Simio.front_angle / 2) or \
-                   -radians(Simio.back_angle / 2) < abs(simio.q - self.q) % pi < radians(Simio.back_angle / 2):
+            if -radians(Simio.front_angle) < simio.q - self.q < radians(Simio.front_angle) or \
+                   -radians(Simio.front_angle) < abs(simio.q - self.q) % pi < radians(Simio.back_angle):
                     if simio.current_message == "1":
                         return simio.current_message
         return None

@@ -208,3 +208,4 @@ class Thymio(ControllableRobot):
         self.aseba.SendEventName("leds.temperature", [0,0])
         self.aseba.SendEventName("leds.sound", [0])
         self.aseba.SendEventName("leds.circle", [32,32,32,32,32,32,32,32])
+        

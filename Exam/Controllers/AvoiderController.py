@@ -1,15 +1,19 @@
 from .RobotController import RobotController
 from Models import Colors, Zones, Actions, States
 from Models.IllegalActions import IllegalActions, IllegalStateActions, IllegalZoneActions
+from .Robots.Simio import Simios
+import math
 
 class AvoiderController(RobotController):
-    def __init__(self, robot, Qtable):
+    def __init__(self, robot, Qtable, seeker_controller):
         super().__init__(robot, Qtable)
         self.robot.set_color(Colors.Blue)
         self.illegal_zone_actions = IllegalZoneActions.Avoider # TODO remove after safe zone logik)
         self.illegal_actions = IllegalActions.Avoider
         self.illegal_state_actions = IllegalStateActions.Avoider
         self.time_alive = 0
+        self.total_distance_from_seeker = 0
+        self.seeker_controller = seeker_controller
 
     def get_reward(self, action, state, zone):
         if action == Actions.Forward:
@@ -22,10 +26,14 @@ class AvoiderController(RobotController):
             return 1
 
     def total_reward(self):
-        return self.time_alive
+        safezone_bonus = 1000 if self.robot.get_zone() == Zones.Safe else 0
+        return self.total_distance_from_seeker + safezone_bonus
 
     def step(self, count):
         if not self.robot.tagged:
+            if self.seeker_controller is not None:
+                dist = math.dist([self.robot.x, self.robot.y], [self.seeker_controller.robot.x, self.seeker_controller.robot.y])
+                self.total_distance_from_seeker += dist
             self.time_alive = count
             super().step(count)
             our_zone = self.robot.get_zone()

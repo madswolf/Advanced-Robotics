@@ -53,30 +53,29 @@ class RobotController(ABC):
         new_zone = self.robot.get_zone()
         new_state = self.robot.get_state()
         
-        if count - self.last_action > 100:
+        if count - self.last_action > 5:
             self.action = None
 
         is_robot_in_way = self.robot.robot_in_way()
         # if we are stuck in this robot in the way state for a long time,
         # for example 1000 count, then we should just allow forward to push people out of the way
         if is_robot_in_way[0] and count - self.last_action < 1000: 
-            avoid_action = Actions.Left
+            avoid_action = Actions.Right
             self.speeds = self.speed_from_action(avoid_action)
         else:
-            if (new_state != self.state or new_zone != self.zone or self.action is None) and (count - self.last_action > 3 or self.action not in [Actions.Left, Actions.Right]):
+            if (new_state != self.state or new_zone != self.zone or self.action is None) and (count - self.last_action > 0 or self.action not in [Actions.Left, Actions.Right]):
                 self.state_statistics[new_state] += 1
                 #if self.action != None:
                 #    self.update_table(self.action, self.state, new_state, self.zone, new_zone)
 
-                if random() <= 0.2:
+                #if random() <= 0.2:
                 # explore
-                    action = randint(0, 2)
-                    while (action, new_zone) in self.illegal_zone_actions or (action, new_state) in self.illegal_state_actions or (action, new_state, new_zone) in self.illegal_actions:
-                        action = randint(0,2)
-                    self.action = action
-                else:
+                #    action = randint(0, 2)
+                #    while (action, new_zone) in self.illegal_zone_actions or (action, new_state) in self.illegal_state_actions or (action, new_state, new_zone) in self.illegal_actions:
+                #        action = randint(0,2)
+                #    self.action = action
                     # exploit
-                    self.action = self.best_action(new_state, new_zone)
+                self.action = self.best_action(new_state, new_zone)
                 self.last_action = count
                 self.state = new_state
                 self.zone = new_zone
@@ -90,7 +89,9 @@ class RobotController(ABC):
         return np.max(self.Q[:, state, zone])
 
     def best_action(self, state, zone):
-        action = np.argmax(self.Q[:, state, zone])
+        clamped_zero = list(map(lambda x: 0 if x<0 else x, list(self.Q[:, state, zone])))
+        normalized_p = list(map(lambda x: x/sum(clamped_zero), clamped_zero))
+        action = np.random.choice(list(range(len(self.Q[:, state, zone]))), 1, p=normalized_p)
         return action
 
     def update_table(self, action, state, new_state, zone, new_zone):
