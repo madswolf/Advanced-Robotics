@@ -5,7 +5,7 @@ from Evolution import build_table_random, export_gen_groups, next_generation
 import time
 
 evolution_data_folder = "Exam/EvolutionData"
-groups_per_run = 16
+groups_per_run = 32
 
 def generate_gen0_input():
     print("generating")
