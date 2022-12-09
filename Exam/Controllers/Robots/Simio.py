@@ -120,7 +120,7 @@ class Simio(ControllableRobot):
             # send a ray from self to other and see if it intersects another robot on the way
             projection = LineString([(self.x, self.y), (other.x, other.y)])
             for simio in Simios:
-                if simio == self or simio == simio.other:
+                if simio == self or simio == other:
                     continue
                 if projection.intersects(simio.robot_circle):
                     return None
