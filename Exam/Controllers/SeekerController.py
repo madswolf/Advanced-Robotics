@@ -24,6 +24,7 @@ class SeekerController(RobotController):
         return self.total_reward_acc
     
     def get_tag_count(self):
+        if "--simulated" in sys.argv: return 0
         return len(list(filter(lambda x: x.tagged, Simios)))
 
     def step(self, count):
