@@ -79,6 +79,4 @@ else:
     for c in controllers:
         if type(c) == Controllers.AvoiderController:
             print(c.robot.name, c.Q)
-        print(c.total_reward())
         arrs, fitness = zip(*[(c.Q, c.total_reward()) for c in reversed(controllers)])
-        print(fitness)
