@@ -13,7 +13,7 @@ class SeekerController(RobotController):
         self.illegal_state_actions = IllegalStateActions.Seeker
         self.illegal_zone_actions = IllegalZoneActions.Seeker
         self.robot.set_color(Colors.Red)
-        self.robot.transmit("1")
+        self.robot.transmit(1)
         self.total_reward_acc = 0
         self.tag_count = 0
 

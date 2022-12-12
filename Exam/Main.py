@@ -61,8 +61,6 @@ else:
 
 count = 1000
 for i in range(count):
-    if i%100 == 0:
-        print(i)
     for c in controllers:
         c.step(i)
 
@@ -77,6 +75,6 @@ if "--import-generation" in sys.argv:
         export_run(arrs, fitness, gen_number, group_number)
 else:
     for c in controllers:
-        if type(c) == Controllers.AvoiderController:
-            print(c.robot.name, c.Q)
+        #if type(c) == Controllers.AvoiderController:
+            #print(c.robot.name, c.Q)
         arrs, fitness = zip(*[(c.Q, c.total_reward()) for c in reversed(controllers)])

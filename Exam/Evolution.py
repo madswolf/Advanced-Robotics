@@ -133,11 +133,21 @@ def export_alpha_and_omega(seekers, avoiders, number):
     file = open(f"{evolution_data_folder}/gen{number}_alpha_omega_sigma.npy", "wb")
     np.save(file,best_seeker[0])
     np.save(file,best_avoider[0])
-    finished_file = open(f"{evolution_data_folder}/{number}_finished.txt", "a")
-    finished_file.write("best seeker reward: " + str(best_seeker[1]) + "\n")
-    finished_file.write("best avoider reward: " + str(best_avoider[1]) + "\n")
-    finished_file.write("average seeker reward: " + str(sum(x[1] for x in seekers)/len(seekers)) + "\n")
-    finished_file.write("average avoider reward: " + str((sum(x[1] for x in avoiders)/len(avoiders))) + "\n")
+    csv_file = open(f"{evolution_data_folder}/output.csv", "a")
+
+    #csv_file.write("rewards: \n")
+    #csv_file.write("(best seeker, average seeker, best avoider, average avoider): \n")
+    #csv_file.write("(")
+
+    csv_file.write(str(best_seeker[1]) + ", ")
+    csv_file.write(str(sum(x[1] for x in seekers)/len(seekers)) + ", ")
+    csv_file.write(str(best_avoider[1][0]) + ", ")
+    csv_file.write(str(sum(x[1][0] for x in avoiders)/len(avoiders)))
+    csv_file.write("\n")
+
+    csv_file.flush()
+    csv_file.close()
+
     file.flush()
     file.close()
 

@@ -3,9 +3,10 @@ import os, sys, subprocess, time
 from yaspin import yaspin
 from Evolution import build_table_random, export_gen_groups, next_generation
 import time
+from os.path import exists
 
 evolution_data_folder = "Exam/EvolutionData"
-groups_per_run = 8
+groups_per_run = 16
 
 def generate_gen0_input():
     print("generating")
@@ -54,6 +55,11 @@ def simulate_gen(current_gen):
     write_elapsed(current_gen, end-start)
 
 if __name__ == "__main__":
+    csv_file = open(f"{evolution_data_folder}/output.csv", "a")
+    if not exists(f"{evolution_data_folder}/output.csv"):
+        csv_file.write("best seeker, average seeker, best avoider, average avoider\n")
+
+    csv_file.close()
     if len(sys.argv) < 3:
         raise Exception("Missing arguments 'current_gen' or 'num_gens'")
         
