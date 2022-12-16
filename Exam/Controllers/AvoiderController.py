@@ -12,7 +12,7 @@ class AvoiderController(RobotController):
         self.illegal_actions = IllegalActions.Avoider
         self.illegal_state_actions = IllegalStateActions.Avoider
         self.time_alive = 0
-        self.total_distance_from_seeker = 0
+        self.reward = 0
         self.seeker_controller = seeker_controller
         self.safezone_prohibition = -999
 
@@ -28,19 +28,19 @@ class AvoiderController(RobotController):
 
     def total_reward(self):
         safezone_bonus = 1000 if self.robot.get_zone() == Zones.Safe else 0
-        return self.total_distance_from_seeker + safezone_bonus
+        return self.time_alive + safezone_bonus
 
     def step(self, count):
         if not self.robot.tagged:
             self.time_alive = count
             our_zone = self.robot.get_zone()
-            safe_zone_bonus_multiplier = 1
+            safe_zone_bonus = 0
             if our_zone == Zones.Safe and self.safezone_prohibition+10 < count:
                 self.robot.set_color(Colors.Green)
-                safe_zone_bonus_multiplier = 5
+                safe_zone_bonus = 5
                 self.robot.drive(0,0)
             else:
-                safe_zone_bonus_multiplier = 1
+                safe_zone_bonus = 0
                 self.robot.set_color(Colors.Blue)
                 if self.safezone_prohibition+10 > count:
                     self.robot.transmit(0)
@@ -48,10 +48,14 @@ class AvoiderController(RobotController):
                     self.robot.transmit(2)
                 super().step(count)
             if self.seeker_controller is not None:
-                dist = math.dist([self.robot.x, self.robot.y], [self.seeker_controller.robot.x, self.seeker_controller.robot.y])
+                #dist = math.dist([self.robot.x, self.robot.y], [self.seeker_controller.robot.x, self.seeker_controller.robot.y])
+                reward = safe_zone_bonus 
+                punishment = 0
                 if self.state in [States.SeekerFront, States.SeekerLeft, States.SeekerRight]:
-                    dist = dist / 4    
-                self.total_distance_from_seeker += dist * safe_zone_bonus_multiplier
+                    if not our_zone == Zones.Safe and self.safezone_prohibition+10 < count:
+                        punishment += 4
+
+                self.reward += reward - punishment
             self.time_alive = count
             receive_message = self.robot.receive()
             if receive_message == 1 and (our_zone != Zones.Safe or self.safezone_prohibition+10 > count):
