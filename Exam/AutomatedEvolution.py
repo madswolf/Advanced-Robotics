@@ -25,8 +25,11 @@ def generate_input_for_next_gen(current_gen):
 
         
 def check_generation_finished(gen, groups):
-    finished_groups = [int(groupname) for groupname in open(f"{evolution_data_folder}/{gen}_finished.txt", "r")]
-    return sorted(finished_groups) == sorted(groups)
+    try:
+        finished_groups = [int(groupname) for groupname in open(f"{evolution_data_folder}/{gen}_finished.txt", "r")]
+        return sorted(finished_groups) == sorted(groups)
+    except:
+        return False
 
 def write_elapsed(gen, elapsed):
     file = open(f"{evolution_data_folder}/{gen}_finished.txt", "a")
@@ -55,9 +58,12 @@ def simulate_gen(current_gen):
     write_elapsed(current_gen, end-start)
 
 if __name__ == "__main__":
-    csv_file = open(f"{evolution_data_folder}/output.csv", "a")
     if not exists(f"{evolution_data_folder}/output.csv"):
+        csv_file = open(f"{evolution_data_folder}/output.csv", "a")
         csv_file.write("best seeker, average seeker, best avoider, average avoider\n")
+        csv_file.flush()
+        csv_file.close()
+    csv_file = open(f"{evolution_data_folder}/output.csv", "a")
 
     csv_file.close()
     if len(sys.argv) < 3:

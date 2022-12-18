@@ -28,7 +28,7 @@ class AvoiderController(RobotController):
 
     def total_reward(self):
         safezone_bonus = 1000 if self.robot.get_zone() == Zones.Safe else 0
-        return self.time_alive + safezone_bonus
+        return self.time_alive + self.reward + safezone_bonus
 
     def step(self, count):
         if not self.robot.tagged:
