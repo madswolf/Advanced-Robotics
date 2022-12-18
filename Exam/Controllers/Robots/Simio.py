@@ -15,7 +15,7 @@ from .ControllableRobot import ControllableRobot
 Simios = []
 
 #start_positions = [(-0.9, -0.4), (-0.8, 0.4), (-0.8, 0.4), (-0.8, 0.4), (-0.8, 0.4)] # seeker is always last
-start_positions = [(0.0, 0.4), (-0.8, 0.4), (0.8, 0.4), (0.8, -0.4), (-0.0, -0.0)] # seeker is always last
+start_positions = [(-0.8, -0.4), (-0.8, 0.4), (0.8, 0.4), (0.8, -0.4), (-0.0, -0.0)] # seeker is always last
 names = ["Hamilton", "Stroll", "Lando", "Alonso", "Verstappen"]
 
 class Simio(ControllableRobot):
