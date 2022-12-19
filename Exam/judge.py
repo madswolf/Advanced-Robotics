@@ -5,8 +5,8 @@ import sys
 import Controllers as Controllers
 from Evolution import build_table_random, import_gen_group, import_gen_best, export_run
 
-before_chain="Before_safe_learn_gen410_alpha_omega_sigma"
-after_chain="After_learn_continued_gen1685_alpha_omega_sigma"
+before_chain="Less_mutation_gen10_alpha_omega_sigma"
+after_chain="Less_mutation_gen1006_alpha_omega_sigma"
 evolution_data_folder = "Exam/evolution_chain_data"
 
 
@@ -28,7 +28,7 @@ def run_chain(chain):
 
     data = []
 
-    for i in range(50):
+    for i in range(500):
         simios = [
             Robots.Simio(),
             Robots.Simio(),
@@ -54,5 +54,7 @@ def run_chain(chain):
 
     return data
 
+print("before")
 print(run_chain(before_chain))
+print("after")
 print(run_chain(after_chain))
