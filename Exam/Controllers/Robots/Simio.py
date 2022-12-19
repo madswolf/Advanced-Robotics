@@ -38,6 +38,12 @@ class Simio(ControllableRobot):
         super().__init__()
         self.TimeStep = 0.1
 
+        if (len(Simios) >= len(names)):
+            Simios.pop()
+            Simios.pop()
+            Simios.pop()
+            Simios.pop()
+            Simios.pop()
         self.name = names[len(Simios)]
         self.x = start_positions[len(Simios)][0]   # robot position in meters - x direction - positive to the right 
         self.y = start_positions[len(Simios)][1]   # robot position in meters - y direction - positive up

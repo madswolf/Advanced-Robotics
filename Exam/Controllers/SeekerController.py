@@ -16,6 +16,7 @@ class SeekerController(RobotController):
         self.robot.transmit(1)
         self.total_reward_acc = 0
         self.tag_count = 0
+        self.isSeeker = True
 
     def get_reward(self, action, state, zone):
         return 0

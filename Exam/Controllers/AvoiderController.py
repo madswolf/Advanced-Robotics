@@ -8,6 +8,7 @@ class AvoiderController(RobotController):
     def __init__(self, robot, Qtable, seeker_controller):
         super().__init__(robot, Qtable)
         self.robot.set_color(Colors.Blue)
+        self.safe_steps = 0
         self.illegal_zone_actions = IllegalZoneActions.Avoider # TODO remove after safe zone logik)
         self.illegal_actions = IllegalActions.Avoider
         self.illegal_state_actions = IllegalStateActions.Avoider
@@ -15,6 +16,7 @@ class AvoiderController(RobotController):
         self.reward = 0
         self.seeker_controller = seeker_controller
         self.safezone_prohibition = -999
+        self.isSeeker = False
 
     def get_reward(self, action, state, zone):
         if action == Actions.Forward:
@@ -37,6 +39,7 @@ class AvoiderController(RobotController):
             safe_zone_bonus = 0
             if our_zone == Zones.Safe and self.safezone_prohibition+10 < count:
                 self.robot.set_color(Colors.Green)
+                self.safe_steps += 1
                 safe_zone_bonus = 5
                 self.robot.drive(0,0)
             else:
