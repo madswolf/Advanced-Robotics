@@ -27,7 +27,7 @@ def mutate_table(t: np.ndarray, is_seeker:bool):
     for idx1, x in enumerate(t):
         for idx2, y in enumerate(x):
             for idx3, z in enumerate(y):
-                if random() > 0.1:
+                if random() > 0.01:
                     Q[idx1][idx2][idx3] = random()
     return disallow_illegal_actions(Q, is_seeker)
 
